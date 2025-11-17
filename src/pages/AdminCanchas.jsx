@@ -259,14 +259,14 @@ const AdminCanchas = () => {
                                             <Edit className="w-4 h-4 mr-2" />
                                             Editar
                                         </Button>
-                                        {/* <Button
+                                        <Button
                                             onClick={() => setCanchaToDelete(cancha.idCancha)}
                                             variant="destructive"
                                             className="flex-1"
                                         >
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             Desactivar
-                                        </Button> */}
+                                        </Button>
                                     </div>
                                 </motion.div>
                             ))}

@@ -24,7 +24,19 @@ const fetchWithAuth = async (endpoint, options = {}) => {
         throw new Error(error.message || 'Error en la petición');
     }
 
-    return response.json();
+    // ✅ Si la respuesta está vacía (204 No Content o DELETE sin body), devolver null
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        return null;
+    }
+
+    // ✅ Si el body está vacío, devolver null
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+        return null;
+    }
+
+    return JSON.parse(text);
 };
 
 // ====================================

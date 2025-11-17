@@ -33,15 +33,30 @@ const MisReservas = () => {
         try {
             setLoading(true);
             const data = await reservasService.getMisReservas();
-            // Filtrar solo las confirmadas y ordenar por fecha
-            const reservasConfirmadas = data
-                .filter(r => r.estado === 'confirmada')
+
+            // Obtener fecha y hora actual
+            const ahora = new Date();
+
+            // Filtrar: solo confirmadas y futuras
+            const reservasFuturas = data
+                .filter(r => {
+                    // Solo reservas confirmadas
+                    if (r.estado !== 'confirmada') return false;
+
+                    // Crear fecha completa de la reserva (fecha + hora)
+                    const fechaReserva = new Date(`${r.fechaReserva}T${r.horaInicio}`);
+
+                    // Mantener solo si es futura
+                    return fechaReserva > ahora;
+                })
                 .sort((a, b) => {
+                    // Ordenar por fecha ascendente (más cercanas primero)
                     const dateA = new Date(`${a.fechaReserva}T${a.horaInicio}`);
                     const dateB = new Date(`${b.fechaReserva}T${b.horaInicio}`);
                     return dateA - dateB;
                 });
-            setReservas(reservasConfirmadas);
+
+            setReservas(reservasFuturas);
         } catch (error) {
             console.error('Error cargando reservas:', error);
             toast({

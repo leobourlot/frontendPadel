@@ -10,6 +10,7 @@ import MisReservas from './pages/MisReservas';
 import AdminCanchas from './pages/AdminCanchas';
 import AdminUsuarios from './pages/AdminUsuarios';
 import ReservasRecurrentes from './pages/ReservasRecurrentes';
+import AdminReservas from './pages/AdminReservas';
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/mis-reservas" element={<PrivateRoute><MisReservas /></PrivateRoute>} />
                 <Route path="/admin/canchas" element={<PrivateRoute><AdminCanchas /></PrivateRoute>} />
                 <Route path="/admin/usuarios" element={<PrivateRoute><AdminUsuarios /></PrivateRoute>} />
+                <Route path="/admin/reservas" element={<PrivateRoute><AdminReservas /></PrivateRoute>} />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
         </AuthProvider>

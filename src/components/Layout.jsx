@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat } from 'lucide-react';
+import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from './Footer';
@@ -28,7 +28,8 @@ const Layout = ({ children }) => {
     // Menú adicional solo para admin
     const adminMenuItems = [
         { icon: MapPin, label: 'Gestionar Canchas', path: '/admin/canchas' },
-        { icon: Users, label: 'Gestionar Usuarios', path: '/admin/usuarios' }
+        { icon: Users, label: 'Gestionar Usuarios', path: '/admin/usuarios' },
+        { icon: CalendarCheck, label: 'Gestionar Reservas', path: '/admin/reservas' }
     ];
 
     // ✅ Verificación estricta del rol
