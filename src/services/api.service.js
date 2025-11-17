@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3000';
+// const API_URL = 'http://localhost:3000';
+const API_URL = 'https://padel.srv805858.hstgr.cloud';
 
 // Helper para obtener el token
 const getToken = () => localStorage.getItem('token');
@@ -137,6 +138,23 @@ export const reservasService = {
         return fetchWithAuth(`/reservas/${id}`, {
             method: 'DELETE'
         });
+    },
+
+    createRecurrente: async (reservaData) => {
+        return fetchWithAuth('/reservas/recurrente', {
+            method: 'POST',
+            body: JSON.stringify(reservaData)
+        });
+    },
+
+    getMisReservasRecurrentes: async () => {
+        return fetchWithAuth('/reservas/recurrente/mis-reservas');
+    },
+
+    cancelRecurrente: async (id) => {
+        return fetchWithAuth(`/reservas/recurrente/${id}`, {
+            method: 'DELETE'
+        });
     }
 };
 
@@ -156,6 +174,22 @@ export const usuariosService = {
         return fetchWithAuth(`/usuarios/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(usuarioData)
+        });
+    },
+
+    // ✅ NUEVO: Cambiar rol de usuario
+    updateRole: async (id, rol) => {
+        return fetchWithAuth(`/usuarios/${id}/rol`, {
+            method: 'PATCH',
+            body: JSON.stringify({ rol })
+        });
+    },
+
+    // ✅ NUEVO: Activar/Desactivar usuario
+    toggleActive: async (id, activo) => {
+        return fetchWithAuth(`/usuarios/${id}/estado`, {
+            method: 'PATCH',
+            body: JSON.stringify({ activo })
         });
     },
 

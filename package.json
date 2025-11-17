@@ -4,9 +4,9 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite --host :: --port 3000",
-        "build": "node tools/generate-llms.js || true && vite build",
-        "preview": "vite preview --host :: --port 3000"
+        "dev": "vite --host :: --port 3001",
+        "build": "vite build",
+        "preview": "vite preview --host :: --port 3001"
     },
     "dependencies": {
         "@radix-ui/react-alert-dialog": "^1.0.5",

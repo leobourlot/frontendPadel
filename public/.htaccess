@@ -1,0 +1,15 @@
+# Habilita el motor de reescritura
+RewriteEngine On
+RewriteBase /
+
+# No aplicar la regla a index.html directamente
+RewriteRule ^index\.html$ - [L]
+
+# Si el archivo o directorio no existe, redirige a index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Opcional: Forzar HTTPS (puedes quitarlo si no tienes SSL)
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

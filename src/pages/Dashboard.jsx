@@ -84,7 +84,7 @@ const Dashboard = () => {
                     </motion.div>
 
                     {/* Carousel de imágenes del club */}
-                    <motion.div
+                    {/* <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
@@ -92,9 +92,9 @@ const Dashboard = () => {
                     >
                         <h2 className="text-2xl font-bold text-white mb-6">Nuestras Instalaciones</h2>
 
-                        <div className="relative">
+                        <div className="relative"> */}
                             {/* Contenedor del carousel */}
-                            <div className="overflow-hidden">
+                            {/* <div className="overflow-hidden">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={currentIndex}
@@ -118,10 +118,10 @@ const Dashboard = () => {
                                         ))}
                                     </motion.div>
                                 </AnimatePresence>
-                            </div>
+                            </div> */}
 
                             {/* Botones de navegación */}
-                            <button
+                            {/* <button
                                 onClick={prevSlide}
                                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/20 hover:bg-white/30 backdrop-blur-lg p-3 rounded-full transition-all"
                                 aria-label="Anterior"
@@ -134,10 +134,10 @@ const Dashboard = () => {
                                 aria-label="Siguiente"
                             >
                                 <ChevronRight className="w-6 h-6 text-white" />
-                            </button>
+                            </button> */}
 
                             {/* Indicadores de página */}
-                            <div className="flex justify-center gap-2 mt-6">
+                            {/* <div className="flex justify-center gap-2 mt-6">
                                 {Array.from({ length: totalPages }).map((_, index) => (
                                     <button
                                         key={index}
@@ -151,7 +151,7 @@ const Dashboard = () => {
                                 ))}
                             </div>
                         </div>
-                    </motion.div>
+                    </motion.div> */}
 
                     {/* Acciones rápidas */}
                     <motion.div
@@ -160,7 +160,7 @@ const Dashboard = () => {
                         transition={{ delay: 0.4 }}
                         className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20"
                     >
-                        <h2 className="text-2xl font-bold text-white mb-6">Acciones Rápidas</h2>
+                        <h2 className="text-2xl font-bold text-white mb-6">Acciones</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Button
                                 onClick={() => navigate('/reservas')}

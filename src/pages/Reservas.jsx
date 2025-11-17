@@ -58,6 +58,15 @@ const Reservas = () => {
                 fechaFormateada
             );
 
+            console.log('📅 Reservas existentes:', reservasExistentes); // ← AGREGAR
+
+            const ahora = new Date();
+            const horaActual = format(ahora, 'HH:mm');
+            const esHoy = format(selectedDate, 'yyyy-MM-dd') === format(ahora, 'yyyy-MM-dd');
+
+            console.log('🕐 Hora actual:', horaActual);
+            console.log('📆 ¿Es hoy?', esHoy);
+
             // Generar horarios de 8:00 a 23:00 cada 90 minutos
             const horariosGenerados = [];
             for (let hour = 8; hour <= 22; hour += 1.5) {
@@ -69,10 +78,28 @@ const Reservas = () => {
                 const horaInicio = format(startTime, 'HH:mm');
                 const horaFin = format(endTime, 'HH:mm');
 
+                // ✅ Si es hoy, ocultar horarios pasados
+                if (esHoy && horaInicio < horaActual) {
+                    console.log(`⏰ ${horaInicio}: ⏭️ PASADO - Omitiendo`);
+                    continue; // No agregar este horario
+                }
+
                 // Verificar si el horario está ocupado
-                const estaOcupado = reservasExistentes.some(reserva =>
-                    reserva.horaInicio === horaInicio && reserva.estado === 'confirmada'
-                );
+                const estaOcupado = reservasExistentes.some(reserva => {
+                    const horaReservaNormalizada = reserva.horaInicio.includes(':')
+                        ? reserva.horaInicio.substring(0, 5)
+                        : reserva.horaInicio;
+
+                    const match = horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+
+                    if (match) {
+                        console.log('✅ MATCH encontrado:', horaInicio);
+                    }
+
+                    return match;
+                });
+
+                console.log(`⏰ ${horaInicio}: ${estaOcupado ? '❌ OCUPADO' : '✅ DISPONIBLE'}`);
 
                 horariosGenerados.push({
                     id: horariosGenerados.length + 1,
@@ -182,8 +209,8 @@ const Reservas = () => {
                                                 setSelectedHorario(null);
                                             }}
                                             className={`p-4 rounded-lg border transition-all ${format(selectedDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-                                                    ? 'bg-emerald-500 border-emerald-400 text-white'
-                                                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                                                ? 'bg-emerald-500 border-emerald-400 text-white'
+                                                : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
                                                 }`}
                                         >
                                             <p className="text-xs font-medium">
@@ -232,25 +259,30 @@ const Reservas = () => {
                                         Horarios Disponibles (90 minutos)
                                     </Label>
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                        {horarios.map((horario) => (
-                                            <button
-                                                key={horario.id}
-                                                onClick={() => horario.disponible && setSelectedHorario(horario)}
-                                                disabled={!horario.disponible}
-                                                className={`p-4 rounded-lg border transition-all ${selectedHorario?.id === horario.id
+                                        {horarios.map((horario) => {
+                                            const isSelected = selectedHorario?.id === horario.id;
+                                            const isAvailable = horario.disponible;
+
+                                            return (
+                                                <button
+                                                    key={horario.id}
+                                                    onClick={() => isAvailable && setSelectedHorario(horario)}
+                                                    disabled={!isAvailable}
+                                                    className={`p-4 rounded-lg border transition-all ${isSelected
                                                         ? 'bg-emerald-500 border-emerald-400 text-white'
-                                                        : horario.disponible
+                                                        : isAvailable
                                                             ? 'bg-white/5 border-white/20 text-white hover:bg-white/10'
-                                                            : 'bg-white/5 border-white/10 text-gray-500 cursor-not-allowed opacity-50'
-                                                    }`}
-                                            >
-                                                <p className="font-semibold">{horario.horaInicio}</p>
-                                                <p className="text-xs mt-1">a {horario.horaFin}</p>
-                                                {!horario.disponible && (
-                                                    <p className="text-xs mt-2 text-red-400">No disponible</p>
-                                                )}
-                                            </button>
-                                        ))}
+                                                            : 'bg-gray-800 border-gray-600 text-gray-400 cursor-not-allowed'
+                                                        }`}
+                                                >
+                                                    <p className="font-semibold">{horario.horaInicio}</p>
+                                                    <p className="text-xs mt-1">a {horario.horaFin}</p>
+                                                    {!isAvailable && (
+                                                        <p className="text-xs mt-2 text-red-400 font-semibold">No disponible</p>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </motion.div>
                             )}

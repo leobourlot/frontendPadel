@@ -1,23 +1,46 @@
-import React from 'react';
+// src/components/Layout.jsx
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Clock, LogOut, Menu, X } from 'lucide-react';
+import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../contexts/AuthContext';
-import { useState } from 'react';
-import Footer from './footer'
+import Footer from './Footer';
 
 const Layout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    const menuItems = [
+    // ✅ DEBUG: Ver qué usuario tenemos
+    // console.log('👤 Usuario en Layout:', user);
+    // console.log('👤 Rol del usuario:', user?.rol);
+
+    // Menú base para todos
+    const baseMenuItems = [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },
         { icon: Calendar, label: 'Nueva Reserva', path: '/reservas' },
+        { icon: Repeat, label: 'Reservas fijas', path: '/reservas-recurrentes' },
         { icon: Clock, label: 'Mis Reservas', path: '/mis-reservas' }
     ];
+
+    // Menú adicional solo para admin
+    const adminMenuItems = [
+        { icon: MapPin, label: 'Gestionar Canchas', path: '/admin/canchas' },
+        { icon: Users, label: 'Gestionar Usuarios', path: '/admin/usuarios' }
+    ];
+
+    // ✅ Verificación estricta del rol
+    const isAdmin = user?.rol === 'admin';
+    // console.log('🔍 ¿Es admin?', isAdmin);
+
+    // Combinar menús según el rol
+    const menuItems = isAdmin
+        ? [...baseMenuItems, ...adminMenuItems]
+        : baseMenuItems;
+
+    // console.log('📋 Menú items:', menuItems.map(m => m.label));
 
     const handleLogout = () => {
         logout();
@@ -29,7 +52,12 @@ const Layout = ({ children }) => {
             {/* Mobile Header */}
             <div className="md:hidden bg-white/10 backdrop-blur-lg border-b border-white/20 p-4">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-white">Club de Pádel</h2>
+                    <div>
+                        <h2 className="text-xl font-bold text-white">Club de Pádel</h2>
+                        {isAdmin && (
+                            <span className="text-xs text-amber-400">👑 Admin</span>
+                        )}
+                    </div>
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="text-white p-2"
@@ -39,12 +67,19 @@ const Layout = ({ children }) => {
                 </div>
             </div>
 
-            {/* Sidebar Desktop (Siempre visible) */}
+            {/* Sidebar Desktop */}
             <aside className="hidden md:block w-64 bg-white/10 backdrop-blur-lg border-r border-white/20">
-                <div className="p-6">
-                    <h2 className="text-2xl font-bold text-white mb-8">Club de Pádel</h2>
+                <div className="p-6 sticky top-0">
+                    <h2 className="text-2xl font-bold text-white mb-2">Club de Pádel</h2>
 
-                    <nav className="space-y-2">
+                    {/* Badge de rol */}
+                    {isAdmin && (
+                        <span className="inline-block bg-amber-500 text-white text-xs px-2 py-1 rounded-full mb-6">
+                            👑 Administrador
+                        </span>
+                    )}
+
+                    <nav className="space-y-2 mt-4">
                         {menuItems.map((item) => (
                             <button
                                 key={item.path}
@@ -76,7 +111,7 @@ const Layout = ({ children }) => {
                 </div>
             </aside>
 
-            {/* Sidebar Mobile (Con animación) */}
+            {/* Sidebar Mobile */}
             <motion.aside
                 initial={false}
                 animate={{
@@ -85,9 +120,15 @@ const Layout = ({ children }) => {
                 className="md:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white/10 backdrop-blur-lg border-r border-white/20"
             >
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold text-white mb-8">Club de Pádel</h2>
+                    <h2 className="text-2xl font-bold text-white mb-2">Club de Pádel</h2>
 
-                    <nav className="space-y-2">
+                    {isAdmin && (
+                        <span className="inline-block bg-amber-500 text-white text-xs px-2 py-1 rounded-full mb-6">
+                            👑 Administrador
+                        </span>
+                    )}
+
+                    <nav className="space-y-2 mt-4">
                         {menuItems.map((item) => (
                             <button
                                 key={item.path}
@@ -130,14 +171,15 @@ const Layout = ({ children }) => {
                 />
             )}
 
-            {/* Main Content */}
-            <main className="flex-1 p-4 md:p-8">
-                <div className="max-w-6xl mx-auto">
-                    {children}
-                </div>
-            </main>
-
-            <Footer/>
+            {/* Contenedor principal con Flexbox */}
+            <div className="flex-1 flex flex-col min-h-screen">
+                <main className="flex-1 p-4 md:p-8">
+                    <div className="max-w-6xl mx-auto">
+                        {children}
+                    </div>
+                </main>
+                <Footer />
+            </div>
         </div>
     );
 };

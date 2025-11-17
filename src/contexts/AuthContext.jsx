@@ -3,13 +3,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 // URL del backend - ajusta según tu configuración
-const API_URL = 'http://localhost:3000';
+// const API_URL = 'http://localhost:3000';
+const API_URL = 'https://padel.srv805858.hstgr.cloud';
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
         throw new Error('useAuth must be used within AuthProvider');
     }
+    // console.log('AuthContext es: ', context)
     return context;
 };
 
@@ -50,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (dni, password) => {
+        // console.log('login llamado')
         try {
             const response = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
@@ -57,12 +60,27 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ dni, password })
             });
 
+            // console.log('Response status:', response.status);
+            // console.log('Response headers:', response.headers);
+
+            // Leer el texto crudo primero
+            const textResponse = await response.text();
+            // console.log('Raw response:', textResponse);
+            
             if (!response.ok) {
-                const error = await response.json();
+                let error;
+                try {
+                    error = JSON.parse(textResponse);
+                } catch {
+                    throw new Error(textResponse || 'Error al iniciar sesión');
+                }
                 throw new Error(error.message || 'Error al iniciar sesión');
             }
 
-            const data = await response.json();
+            // Intentar parsear el JSON
+            const data = JSON.parse(textResponse);
+
+            // const data = await response.json();
 
             // Guardar token y usuario
             localStorage.setItem('token', data.token);
