@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 // const API_URL = 'https://api.turnos.bourderweb.com.ar';
-const API_URL = 'https://backendpadel-n3u9.onrender.com';
+// const API_URL = 'https://backendpadel-n3u9.onrender.com';
+const API_URL = 'https://n8n-bourder-padelturnos.nvtq0w.easypanel.host/';
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
