@@ -2,150 +2,123 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-// URL del backend - ajusta según tu configuración
-// const API_URL = 'http://localhost:3000';
-const API_URL = 'https://padel.srv805858.hstgr.cloud';
+// const API_URL = 'https://api.turnos.bourderweb.com.ar';
+const API_URL = 'https://backendpadel-n3u9.onrender.com';
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within AuthProvider');
-    }
-    // console.log('AuthContext es: ', context)
+    if (!context) throw new Error('useAuth must be used within AuthProvider');
     return context;
 };
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [club, setClub] = useState(null); // ← nuevo: info del club actual
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Verificar si hay un usuario guardado al cargar la app
         const storedUser = localStorage.getItem('user');
         const storedToken = localStorage.getItem('token');
+        const storedClub = localStorage.getItem('club');
 
         if (storedUser && storedToken) {
             setUser(JSON.parse(storedUser));
-            // Opcionalmente, verificar si el token sigue siendo válido
+            if (storedClub) setClub(JSON.parse(storedClub));
             verifyToken(storedToken);
         }
         setLoading(false);
     }, []);
 
+    // Headers base (incluye club slug en desarrollo)
+    const getHeaders = () => {
+        const headers = { 'Content-Type': 'application/json' };
+        const devSlug = localStorage.getItem('dev_club_slug');
+        if (devSlug && window.location.hostname === 'localhost') {
+            headers['X-Club-Slug'] = devSlug;
+        }
+        return headers;
+    };
+
     const verifyToken = async (token) => {
         try {
             const response = await fetch(`${API_URL}/auth/profile`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                headers: { ...getHeaders(), Authorization: `Bearer ${token}` },
             });
-
-            if (!response.ok) {
-                // Token inválido o expirado
-                logout();
-            }
-        } catch (error) {
-            console.error('Error verificando token:', error);
+            if (!response.ok) logout();
+        } catch {
             logout();
         }
     };
 
     const login = async (dni, password) => {
-        // console.log('login llamado')
-        try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dni, password })
-            });
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ dni, password }),
+        });
 
-            // console.log('Response status:', response.status);
-            // console.log('Response headers:', response.headers);
+        const textResponse = await response.text();
 
-            // Leer el texto crudo primero
-            const textResponse = await response.text();
-            // console.log('Raw response:', textResponse);
-            
-            if (!response.ok) {
-                let error;
-                try {
-                    error = JSON.parse(textResponse);
-                } catch {
-                    throw new Error(textResponse || 'Error al iniciar sesión');
-                }
-                throw new Error(error.message || 'Error al iniciar sesión');
-            }
-
-            // Intentar parsear el JSON
-            const data = JSON.parse(textResponse);
-
-            // const data = await response.json();
-
-            // Guardar token y usuario
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.usuario));
-            setUser(data.usuario);
-
-            return data.usuario;
-        } catch (error) {
-            console.error('Error en login:', error);
-            throw error;
+        if (!response.ok) {
+            let error;
+            try { error = JSON.parse(textResponse); } catch { throw new Error(textResponse || 'Error al iniciar sesión'); }
+            throw new Error(error.message || 'Error al iniciar sesión');
         }
+
+        const data = JSON.parse(textResponse);
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.usuario));
+        localStorage.setItem('club', JSON.stringify(data.club));
+        setUser(data.usuario);
+        setClub(data.club);
+
+        return data.usuario;
     };
 
     const register = async (userData) => {
-        try {
-            const response = await fetch(`${API_URL}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData)
-            });
+        const response = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(userData),
+        });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Error al registrarse');
-            }
-
-            const data = await response.json();
-
-            // Guardar token y usuario
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.usuario));
-            setUser(data.usuario);
-
-            return data.usuario;
-        } catch (error) {
-            console.error('Error en registro:', error);
-            throw error;
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al registrarse');
         }
+
+        const data = await response.json();
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.usuario));
+        localStorage.setItem('club', JSON.stringify(data.club));
+        setUser(data.usuario);
+        setClub(data.club);
+
+        return data.usuario;
     };
 
     const logout = () => {
         setUser(null);
+        setClub(null);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        localStorage.removeItem('club');
     };
 
-    // Helper para obtener el token (útil para otras peticiones)
-    const getToken = () => {
-        return localStorage.getItem('token');
-    };
+    const getToken = () => localStorage.getItem('token');
 
-    // Helper para hacer peticiones autenticadas
     const fetchWithAuth = async (url, options = {}) => {
         const token = getToken();
-
-        const config = {
+        return fetch(`${API_URL}${url}`, {
             ...options,
             headers: {
+                ...getHeaders(),
                 ...options.headers,
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        };
-
-        return fetch(`${API_URL}${url}`, config);
+                Authorization: `Bearer ${token}`,
+            },
+        });
     };
 
     if (loading) {
@@ -159,12 +132,13 @@ export const AuthProvider = ({ children }) => {
     return (
         <AuthContext.Provider value={{
             user,
+            club,        // ← disponible en toda la app
             login,
             register,
             logout,
             getToken,
             fetchWithAuth,
-            isAuthenticated: !!user
+            isAuthenticated: !!user,
         }}>
             {children}
         </AuthContext.Provider>

@@ -74,6 +74,8 @@ const Login = () => {
                                 </motion.div>
                                 <h1 className="text-3xl font-bold text-white mb-2">Bienvenido</h1>
                                 <p className="text-gray-300">Inicia sesión para reservar tu cancha</p>
+                                <p>Usuario de prueba: 99999999</p>
+                                <p>Contraseña: 123456</p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">

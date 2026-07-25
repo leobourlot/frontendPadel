@@ -1,7 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { useAuth } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -11,6 +10,7 @@ import AdminCanchas from './pages/AdminCanchas';
 import AdminUsuarios from './pages/AdminUsuarios';
 import ReservasRecurrentes from './pages/ReservasRecurrentes';
 import AdminReservas from './pages/AdminReservas';
+import Vencido from './pages/Vencido';
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -26,6 +26,7 @@ function App() {
     return (
         <AuthProvider>
             <Routes>
+                <Route path="/vencido" element={<Vencido />} />
                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
                 <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
