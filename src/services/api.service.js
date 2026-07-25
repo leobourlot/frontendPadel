@@ -10,21 +10,34 @@ const getToken = () => localStorage.getItem('token');
 const fetchWithAuth = async (endpoint, options = {}) => {
     const token = getToken();
 
+    // const config = {
+    //     ...options,
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         ...options.headers,
+    //         ...(token && { Authorization: `Bearer ${token}` }),
+    //     },
+    // };
+
+    // // En desarrollo local, pasar el club por header para testear
+    // // Ejemplo: setClubSlug('clubdelrio') en la consola del navegador
+    // const devSlug = localStorage.getItem('dev_club_slug');
+    // if (devSlug && window.location.hostname === 'localhost') {
+    //     config.headers['X-Club-Slug'] = devSlug;
+    // }
+    // Leer el slug del subdominio actual del frontend
+    const hostname = window.location.hostname;
+    const slug = hostname.split('.')[0];
+
     const config = {
         ...options,
         headers: {
             'Content-Type': 'application/json',
             ...options.headers,
             ...(token && { Authorization: `Bearer ${token}` }),
+            'X-Club-Slug': slug,  // ← siempre se manda
         },
     };
-
-    // En desarrollo local, pasar el club por header para testear
-    // Ejemplo: setClubSlug('clubdelrio') en la consola del navegador
-    const devSlug = localStorage.getItem('dev_club_slug');
-    if (devSlug && window.location.hostname === 'localhost') {
-        config.headers['X-Club-Slug'] = devSlug;
-    }
 
     const response = await fetch(`${API_URL}${endpoint}`, config);
 

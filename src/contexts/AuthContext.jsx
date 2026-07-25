@@ -31,12 +31,19 @@ export const AuthProvider = ({ children }) => {
 
     // Headers base (incluye club slug en desarrollo)
     const getHeaders = () => {
-        const headers = { 'Content-Type': 'application/json' };
-        const devSlug = localStorage.getItem('dev_club_slug');
-        if (devSlug && window.location.hostname === 'localhost') {
-            headers['X-Club-Slug'] = devSlug;
-        }
-        return headers;
+        // const headers = { 'Content-Type': 'application/json' };
+        // const devSlug = localStorage.getItem('dev_club_slug');
+        // if (devSlug && window.location.hostname === 'localhost') {
+        //     headers['X-Club-Slug'] = devSlug;
+        // }
+        // return headers;
+        const hostname = window.location.hostname;
+        const slug = hostname.split('.')[0];
+
+        return {
+            'Content-Type': 'application/json',
+            'X-Club-Slug': slug,  // ← siempre se manda
+        };
     };
 
     const verifyToken = async (token) => {
