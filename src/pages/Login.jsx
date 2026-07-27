@@ -9,6 +9,8 @@ import { Label } from '../components/ui/label';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/ui/use-toast';
 import Footer from '../components/Footer';
+import { useLocation } from 'react-router-dom';
+
 
 const Login = () => {
     const [dni, setDni] = useState('');
@@ -17,6 +19,8 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const location = useLocation();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,7 +32,8 @@ const Login = () => {
                 title: "¡Bienvenido! 🎾",
                 description: "Has iniciado sesión correctamente",
             });
-            navigate('/dashboard');
+            const from = location.state?.from || '/dashboard';
+            navigate(from);
         } catch (error) {
             console.error('Error en login:', error);
 

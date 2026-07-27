@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck } from 'lucide-react';
+import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck, LogIn } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from './Footer';
@@ -16,6 +16,14 @@ const Layout = ({ children }) => {
     // ✅ DEBUG: Ver qué usuario tenemos
     // console.log('👤 Usuario en Layout:', user);
     // console.log('👤 Rol del usuario:', user?.rol);
+
+    const isGuest = !user;
+    const isAdmin = user?.rol === 'admin';
+
+    // Menú reducido para invitados
+    const guestMenuItems = [
+        { icon: Calendar, label: 'Nueva Reserva', path: '/reservas' },
+    ];
 
     // Menú base para todos
     const baseMenuItems = [
@@ -37,9 +45,14 @@ const Layout = ({ children }) => {
     // console.log('🔍 ¿Es admin?', isAdmin);
 
     // Combinar menús según el rol
-    const menuItems = isAdmin
-        ? [...baseMenuItems, ...adminMenuItems]
-        : baseMenuItems;
+    const menuItems = isGuest
+        ? guestMenuItems
+        : isAdmin
+            ? [...baseMenuItems, ...adminMenuItems]
+            : baseMenuItems;
+    // const menuItems = isAdmin
+    //     ? [...baseMenuItems, ...adminMenuItems]
+    //     : baseMenuItems;
 
     // console.log('📋 Menú items:', menuItems.map(m => m.label));
 
@@ -100,14 +113,24 @@ const Layout = ({ children }) => {
                     </nav>
 
                     <div className="mt-8 pt-8 border-t border-white/20">
-                        <Button
-                            onClick={handleLogout}
-                            variant="ghost"
-                            className="w-full justify-start text-gray-300 hover:bg-white/10 hover:text-white"
-                        >
-                            <LogOut className="w-5 h-5 mr-3" />
-                            Cerrar Sesión
-                        </Button>
+                        {isGuest ? (
+                            <Button
+                                onClick={() => navigate('/login')}
+                                className="w-full justify-start bg-emerald-500 hover:bg-emerald-600 text-white"
+                            >
+                                <LogIn className="w-5 h-5 mr-3" />
+                                Iniciar Sesión
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleLogout}
+                                variant="ghost"
+                                className="w-full justify-start text-gray-300 hover:bg-white/10 hover:text-white"
+                            >
+                                <LogOut className="w-5 h-5 mr-3" />
+                                Cerrar Sesión
+                            </Button>
+                        )}
                     </div>
                 </div>
             </aside>
@@ -152,14 +175,24 @@ const Layout = ({ children }) => {
                     </nav>
 
                     <div className="mt-8 pt-8 border-t border-white/20">
-                        <Button
-                            onClick={handleLogout}
-                            variant="ghost"
-                            className="w-full justify-start text-gray-300 hover:bg-white/10 hover:text-white"
-                        >
-                            <LogOut className="w-5 h-5 mr-3" />
-                            Cerrar Sesión
-                        </Button>
+                        {isGuest ? (
+                            <Button
+                                onClick={() => navigate('/login')}
+                                className="w-full justify-start bg-emerald-500 hover:bg-emerald-600 text-white"
+                            >
+                                <LogIn className="w-5 h-5 mr-3" />
+                                Iniciar Sesión
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleLogout}
+                                variant="ghost"
+                                className="w-full justify-start text-gray-300 hover:bg-white/10 hover:text-white"
+                            >
+                                <LogOut className="w-5 h-5 mr-3" />
+                                Cerrar Sesión
+                            </Button>
+                        )}
                     </div>
                 </div>
             </motion.aside>

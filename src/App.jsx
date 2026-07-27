@@ -27,16 +27,19 @@ function App() {
         <AuthProvider>
             <Routes>
                 <Route path="/vencido" element={<Vencido />} />
-                <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+
+                {/* ✅ pública: cualquiera puede ver turnos */}
+                <Route path="/reservas" element={<Reservas />} />
+
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                <Route path="/reservas" element={<PrivateRoute><Reservas /></PrivateRoute>} />
                 <Route path="/reservas-recurrentes" element={<PrivateRoute><ReservasRecurrentes /></PrivateRoute>} />
                 <Route path="/mis-reservas" element={<PrivateRoute><MisReservas /></PrivateRoute>} />
                 <Route path="/admin/canchas" element={<PrivateRoute><AdminCanchas /></PrivateRoute>} />
                 <Route path="/admin/usuarios" element={<PrivateRoute><AdminUsuarios /></PrivateRoute>} />
                 <Route path="/admin/reservas" element={<PrivateRoute><AdminReservas /></PrivateRoute>} />
-                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/" element={<Navigate to="/reservas" />} />
             </Routes>
         </AuthProvider>
     );

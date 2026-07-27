@@ -11,8 +11,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { canchasService, reservasService } from '../services/api.service';
+import { useNavigate } from 'react-router-dom'; // agregar si no está
 
 const Reservas = () => {
+    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedCancha, setSelectedCancha] = useState('');
     const [selectedHorario, setSelectedHorario] = useState(null);
@@ -141,6 +143,24 @@ const Reservas = () => {
             return;
         }
 
+        // ✅ NUEVO: si no hay usuario logueado, guardar selección y pedir login
+        if (!user) {
+            const pendingReserva = {
+                idCancha: selectedCancha,
+                fechaReserva: format(selectedDate, 'yyyy-MM-dd'),
+                horaInicio: selectedHorario.horaInicio,
+                horaFin: selectedHorario.horaFin,
+            };
+            sessionStorage.setItem('pendingReserva', JSON.stringify(pendingReserva));
+
+            toast({
+                title: "Iniciá sesión para reservar",
+                description: "Necesitás una cuenta para confirmar tu turno",
+            });
+            navigate('/login', { state: { from: '/reservas' } });
+            return;
+        }
+
         setLoading(true);
         try {
             const reservaData = {
@@ -171,6 +191,34 @@ const Reservas = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const intentarCompletarPendiente = async () => {
+            const pendingRaw = sessionStorage.getItem('pendingReserva');
+            if (!pendingRaw || !user) return;
+
+            const pending = JSON.parse(pendingRaw);
+            sessionStorage.removeItem('pendingReserva');
+
+            try {
+                await reservasService.create(pending);
+                toast({
+                    title: "¡Reserva confirmada! 🎾",
+                    description: "Tu cancha ha sido reservada exitosamente",
+                });
+                setSelectedCancha(pending.idCancha.toString());
+                await loadHorariosDisponibles();
+            } catch (error) {
+                toast({
+                    title: "No se pudo completar la reserva",
+                    description: "El horario ya no está disponible, elegí otro",
+                    variant: "destructive",
+                });
+            }
+        };
+
+        intentarCompletarPendiente();
+    }, [user]);
 
     const nextDays = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
 
