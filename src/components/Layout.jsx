@@ -18,7 +18,7 @@ const Layout = ({ children }) => {
     // console.log('👤 Rol del usuario:', user?.rol);
 
     const isGuest = !user;
-    const isAdmin = user?.rol === 'admin';
+    // const isAdmin = user?.rol === 'admin';
 
     // Menú reducido para invitados
     const guestMenuItems = [
