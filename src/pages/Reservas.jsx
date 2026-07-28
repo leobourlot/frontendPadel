@@ -60,14 +60,14 @@ const Reservas = () => {
                 fechaFormateada
             );
 
-            console.log('📅 Reservas existentes:', reservasExistentes); // ← AGREGAR
+            // console.log('📅 Reservas existentes:', reservasExistentes); // ← AGREGAR
 
             const ahora = new Date();
             const horaActual = format(ahora, 'HH:mm');
             const esHoy = format(selectedDate, 'yyyy-MM-dd') === format(ahora, 'yyyy-MM-dd');
 
-            console.log('🕐 Hora actual:', horaActual);
-            console.log('📆 ¿Es hoy?', esHoy);
+            // console.log('🕐 Hora actual:', horaActual);
+            // console.log('📆 ¿Es hoy?', esHoy);
 
             // Generar horarios de 8:00 a 23:00 cada 90 minutos
             const horariosGenerados = [];
@@ -82,7 +82,7 @@ const Reservas = () => {
 
                 // ✅ Si es hoy, ocultar horarios pasados
                 if (esHoy && horaInicio < horaActual) {
-                    console.log(`⏰ ${horaInicio}: ⏭️ PASADO - Omitiendo`);
+                    // console.log(`⏰ ${horaInicio}: ⏭️ PASADO - Omitiendo`);
                     continue; // No agregar este horario
                 }
 
@@ -95,13 +95,13 @@ const Reservas = () => {
                     const match = horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
 
                     if (match) {
-                        console.log('✅ MATCH encontrado:', horaInicio);
+                        // console.log('✅ MATCH encontrado:', horaInicio);
                     }
 
                     return match;
                 });
 
-                console.log(`⏰ ${horaInicio}: ${estaOcupado ? '❌ OCUPADO' : '✅ DISPONIBLE'}`);
+                // console.log(`⏰ ${horaInicio}: ${estaOcupado ? '❌ OCUPADO' : '✅ DISPONIBLE'}`);
 
                 horariosGenerados.push({
                     id: horariosGenerados.length + 1,
@@ -145,13 +145,13 @@ const Reservas = () => {
 
         // ✅ NUEVO: si no hay usuario logueado, guardar selección y pedir login
         if (!user) {
-            const pendingReserva = {
-                idCancha: selectedCancha,
+            const pendingSeleccion = {
+                idCancha: parseInt(selectedCancha),
                 fechaReserva: format(selectedDate, 'yyyy-MM-dd'),
                 horaInicio: selectedHorario.horaInicio,
                 horaFin: selectedHorario.horaFin,
             };
-            sessionStorage.setItem('pendingReserva', JSON.stringify(pendingReserva));
+            sessionStorage.setItem('pendingSeleccion', JSON.stringify(pendingSeleccion));
 
             toast({
                 title: "Iniciá sesión para reservar",
@@ -193,31 +193,86 @@ const Reservas = () => {
     };
 
     useEffect(() => {
-        const intentarCompletarPendiente = async () => {
-            const pendingRaw = sessionStorage.getItem('pendingReserva');
+        const restaurarSeleccion = async () => {
+            const pendingRaw = sessionStorage.getItem('pendingSeleccion');
             if (!pendingRaw || !user) return;
 
             const pending = JSON.parse(pendingRaw);
-            sessionStorage.removeItem('pendingReserva');
+            sessionStorage.removeItem('pendingSeleccion');
 
+            const fechaReserva = pending.fechaReserva || pending.fecha;
+            if (!fechaReserva) {
+                console.error('No se encontró la fecha en pendingSeleccion:', pending);
+                return;
+            }
+
+            const fechaRestaurada = new Date(`${fechaReserva}T00:00:00`);
+            if (Number.isNaN(fechaRestaurada.getTime())) {
+                console.error('Fecha inválida en pendingSeleccion:', pending);
+                return;
+            }
+
+            setSelectedDate(fechaRestaurada);
+            setSelectedCancha(String(pending.idCancha));
+
+            // Cargar horarios para esa fecha/cancha y, si el horario elegido sigue disponible, preseleccionarlo
             try {
-                await reservasService.create(pending);
-                toast({
-                    title: "¡Reserva confirmada! 🎾",
-                    description: "Tu cancha ha sido reservada exitosamente",
-                });
-                setSelectedCancha(pending.idCancha.toString());
-                await loadHorariosDisponibles();
+                const fechaFormateada = format(fechaRestaurada, 'yyyy-MM-dd');
+                const reservasExistentes = await reservasService.getByCancha(pending.idCancha, fechaFormateada);
+
+                const ahora = new Date();
+                const horaActual = format(ahora, 'HH:mm');
+                const esHoy = fechaFormateada === format(ahora, 'yyyy-MM-dd');
+
+                const horariosGenerados = [];
+                for (let hour = 8; hour <= 22; hour += 1.5) {
+                    const wholeHour = Math.floor(hour);
+                    const minutes = (hour % 1) * 60;
+                    const startTime = setMinutes(setHours(fechaRestaurada, wholeHour), minutes);
+                    const endTime = new Date(startTime.getTime() + 90 * 60000);
+                    const horaInicio = format(startTime, 'HH:mm');
+                    const horaFin = format(endTime, 'HH:mm');
+
+                    if (esHoy && horaInicio < horaActual) continue;
+
+                    const estaOcupado = reservasExistentes.some(reserva => {
+                        const horaReservaNormalizada = reserva.horaInicio.includes(':')
+                            ? reserva.horaInicio.substring(0, 5)
+                            : reserva.horaInicio;
+                        return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+                    });
+
+                    horariosGenerados.push({
+                        id: horariosGenerados.length + 1,
+                        horaInicio,
+                        horaFin,
+                        disponible: !estaOcupado
+                    });
+                }
+
+                setHorarios(horariosGenerados);
+
+                // Preseleccionar el horario elegido antes, solo si sigue disponible
+                const horarioPrevio = horariosGenerados.find(h => h.horaInicio === pending.horaInicio);
+                if (horarioPrevio && horarioPrevio.disponible) {
+                    setSelectedHorario(horarioPrevio);
+                    toast({
+                        title: "Volviste a tu selección 👍",
+                        description: "Confirmá la reserva cuando quieras",
+                    });
+                } else {
+                    toast({
+                        title: "Ese horario ya no está disponible",
+                        description: "Elegí otro horario para continuar",
+                        variant: "destructive",
+                    });
+                }
             } catch (error) {
-                toast({
-                    title: "No se pudo completar la reserva",
-                    description: "El horario ya no está disponible, elegí otro",
-                    variant: "destructive",
-                });
+                console.error('Error restaurando selección:', error);
             }
         };
 
-        intentarCompletarPendiente();
+        restaurarSeleccion();
     }, [user]);
 
     const nextDays = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));

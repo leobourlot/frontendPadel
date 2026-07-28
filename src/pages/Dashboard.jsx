@@ -11,6 +11,8 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [currentIndex, setCurrentIndex] = useState(0);
+    const { club } = useAuth();
+
 
     // Array con TODAS tus imágenes
     const imagenesClub = [
@@ -60,8 +62,7 @@ const Dashboard = () => {
     return (
         <>
             <Helmet>
-                <title>Dashboard - Club de Pádel</title>
-                <meta name="description" content="Panel principal del club de pádel" />
+                <title>{club?.nombre ? `${club.nombre} - Reservas` : 'Club de Pádel'}</title>                <meta name="description" content="Panel principal del club de pádel" />
             </Helmet>
 
             <Layout>
@@ -93,8 +94,8 @@ const Dashboard = () => {
                         <h2 className="text-2xl font-bold text-white mb-6">Nuestras Instalaciones</h2>
 
                         <div className="relative"> */}
-                            {/* Contenedor del carousel */}
-                            {/* <div className="overflow-hidden">
+                    {/* Contenedor del carousel */}
+                    {/* <div className="overflow-hidden">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={currentIndex}
@@ -120,8 +121,8 @@ const Dashboard = () => {
                                 </AnimatePresence>
                             </div> */}
 
-                            {/* Botones de navegación */}
-                            {/* <button
+                    {/* Botones de navegación */}
+                    {/* <button
                                 onClick={prevSlide}
                                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white/20 hover:bg-white/30 backdrop-blur-lg p-3 rounded-full transition-all"
                                 aria-label="Anterior"
@@ -136,8 +137,8 @@ const Dashboard = () => {
                                 <ChevronRight className="w-6 h-6 text-white" />
                             </button> */}
 
-                            {/* Indicadores de página */}
-                            {/* <div className="flex justify-center gap-2 mt-6">
+                    {/* Indicadores de página */}
+                    {/* <div className="flex justify-center gap-2 mt-6">
                                 {Array.from({ length: totalPages }).map((_, index) => (
                                     <button
                                         key={index}

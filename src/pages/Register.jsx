@@ -24,6 +24,7 @@ const Register = () => {
     const { register } = useAuth();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { club } = useAuth();
 
     const handleChange = (e) => {
         setFormData({
@@ -67,8 +68,7 @@ const Register = () => {
     return (
         <>
             <Helmet>
-                <title>Registro - Club de Pádel</title>
-                <meta name="description" content="Crea tu cuenta en el club de pádel" />
+                <title>{club?.nombre ? `${club.nombre} - Reservas` : 'Club de Pádel'}</title>                <meta name="description" content="Crea tu cuenta en el club de pádel" />
             </Helmet>
 
             <div className="min-h-screen flex flex-col">

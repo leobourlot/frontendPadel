@@ -20,7 +20,7 @@ const Login = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const location = useLocation();
-
+    const { club } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -55,8 +55,7 @@ const Login = () => {
     return (
         <>
             <Helmet>
-                <title>Iniciar Sesión - Club de Pádel</title>
-                <meta name="description" content="Inicia sesión en tu cuenta del club de pádel" />
+                <title>{club?.nombre ? `${club.nombre} - Reservas` : 'Club de Pádel'}</title>                <meta name="description" content="Inicia sesión en tu cuenta del club de pádel" />
             </Helmet>
 
             <div className="min-h-screen flex flex-col">

@@ -10,7 +10,7 @@ import Footer from './Footer';
 const Layout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { logout, user } = useAuth();
+    const { logout, user, club } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // ✅ DEBUG: Ver qué usuario tenemos
@@ -67,7 +67,7 @@ const Layout = ({ children }) => {
             <div className="md:hidden bg-white/10 backdrop-blur-lg border-b border-white/20 p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-bold text-white">Club de Pádel</h2>
+                        <h2 className="text-2xl font-bold text-white mb-2">{club?.nombre || 'Club de Pádel'}</h2>
                         {isAdmin && (
                             <span className="text-xs text-amber-400">👑 Admin</span>
                         )}
@@ -84,7 +84,7 @@ const Layout = ({ children }) => {
             {/* Sidebar Desktop */}
             <aside className="hidden md:block w-64 bg-white/10 backdrop-blur-lg border-r border-white/20">
                 <div className="p-6 sticky top-0">
-                    <h2 className="text-2xl font-bold text-white mb-2">Club de Pádel</h2>
+                    <h2 className="text-2xl font-bold text-white mb-2">{club?.nombre || 'Club de Pádel'}</h2>
 
                     {/* Badge de rol */}
                     {isAdmin && (
@@ -144,7 +144,7 @@ const Layout = ({ children }) => {
                 className="md:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white/10 backdrop-blur-lg border-r border-white/20"
             >
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">Club de Pádel</h2>
+                    <h2 className="text-2xl font-bold text-white mb-2">{club?.nombre || 'Club de Pádel'}</h2>
 
                     {isAdmin && (
                         <span className="inline-block bg-amber-500 text-white text-xs px-2 py-1 rounded-full mb-6">

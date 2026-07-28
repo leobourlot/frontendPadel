@@ -2,7 +2,7 @@
 // por el subdominio en el middleware del servidor.
 // const API_URL = 'https://api.turnos.bourderweb.com.ar';
 // const API_URL = 'https://backendpadel-n3u9.onrender.com';
-const API_URL = 'https://n8n-bourder-padelturnos.nvtq0w.easypanel.host/';
+const API_URL = 'https://n8n-bourder-padelturnos.nvtq0w.easypanel.host';
 
 // Helper para obtener el token
 const getToken = () => localStorage.getItem('token');

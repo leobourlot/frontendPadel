@@ -30,6 +30,27 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
+    useEffect(() => {
+        const loadClubInfo = async () => {
+            try {
+                const response = await fetch(`${API_URL}/clubes/info`, {
+                    headers: getHeaders(),
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                setClub(data);
+                localStorage.setItem('club', JSON.stringify(data));
+            } catch (error) {
+                console.error('No se pudo cargar la info del club:', error);
+            }
+        };
+
+        // Solo si todavía no tenemos club cargado (evita pisar el que vino del login)
+        if (!club) {
+            loadClubInfo();
+        }
+    }, []);
+
     // Headers base (incluye club slug en desarrollo)
     const getHeaders = () => {
         // const headers = { 'Content-Type': 'application/json' };
