@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck, LogIn } from 'lucide-react';
+import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck, LogIn, Building2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from './Footer';
@@ -18,6 +18,10 @@ const Layout = ({ children }) => {
     // console.log('👤 Rol del usuario:', user?.rol);
 
     const isGuest = !user;
+
+    const isSuperAdmin = user?.rol === 'superadmin';
+    
+    const isAdmin = user?.rol === 'admin';
     // const isAdmin = user?.rol === 'admin';
 
     // Menú reducido para invitados
@@ -40,16 +44,27 @@ const Layout = ({ children }) => {
         { icon: CalendarCheck, label: 'Gestionar Reservas', path: '/admin/reservas' }
     ];
 
+    const superAdminMenuItems = [
+        { icon: Building2, label: 'Clubes (Super Admin)', path: '/superadmin/clubes' },
+    ];
+
+    const menuItems = isGuest
+        ? guestMenuItems
+        : isSuperAdmin
+            ? [...baseMenuItems, ...superAdminMenuItems]
+            : isAdmin
+                ? [...baseMenuItems, ...adminMenuItems]
+                : baseMenuItems;
+
     // ✅ Verificación estricta del rol
-    const isAdmin = user?.rol === 'admin';
     // console.log('🔍 ¿Es admin?', isAdmin);
 
     // Combinar menús según el rol
-    const menuItems = isGuest
-        ? guestMenuItems
-        : isAdmin
-            ? [...baseMenuItems, ...adminMenuItems]
-            : baseMenuItems;
+    // const menuItems = isGuest
+    //     ? guestMenuItems
+    //     : isAdmin
+    //         ? [...baseMenuItems, ...adminMenuItems]
+    //         : baseMenuItems;
     // const menuItems = isAdmin
     //     ? [...baseMenuItems, ...adminMenuItems]
     //     : baseMenuItems;

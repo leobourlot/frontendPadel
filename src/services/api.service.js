@@ -163,4 +163,16 @@ export const authService = {
     getProfile: () => fetchWithAuth('/auth/profile'),
 };
 
-export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService };
+// ====================================
+// SERVICIOS DE CLUBES (solo SUPERADMIN)
+// ====================================
+export const clubesService = {
+    getAll: () => fetchWithAuth('/clubes'),
+    getById: (id) => fetchWithAuth(`/clubes/${id}`),
+    create: (clubData) => fetchWithAuth('/clubes', { method: 'POST', body: JSON.stringify(clubData) }),
+    createConAdmin: (data) => fetchWithAuth('/clubes/con-admin', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, clubData) => fetchWithAuth(`/clubes/${id}`, { method: 'PATCH', body: JSON.stringify(clubData) }),
+    delete: (id) => fetchWithAuth(`/clubes/${id}`, { method: 'DELETE' }),
+};
+
+export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService };

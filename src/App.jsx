@@ -11,6 +11,8 @@ import AdminUsuarios from './pages/AdminUsuarios';
 import ReservasRecurrentes from './pages/ReservasRecurrentes';
 import AdminReservas from './pages/AdminReservas';
 import Vencido from './pages/Vencido';
+import SuperAdminClubes from './pages/SuperAdminClubes';
+
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -20,6 +22,13 @@ function PrivateRoute({ children }) {
 function PublicRoute({ children }) {
     const { user } = useAuth();
     return !user ? children : <Navigate to="/dashboard" />;
+}
+
+function SuperAdminRoute({ children }) {
+    const { user } = useAuth();
+    if (!user) return <Navigate to="/login" />;
+    if (user.rol !== 'superadmin') return <Navigate to="/dashboard" />;
+    return children;
 }
 
 function App() {
@@ -40,7 +49,7 @@ function App() {
                 <Route path="/admin/usuarios" element={<PrivateRoute><AdminUsuarios /></PrivateRoute>} />
                 <Route path="/admin/reservas" element={<PrivateRoute><AdminReservas /></PrivateRoute>} />
                 <Route path="/" element={<Navigate to="/reservas" />} />
-            </Routes>
+                <Route path="/superadmin/clubes" element={<SuperAdminRoute><SuperAdminClubes /></SuperAdminRoute>} />            </Routes>
         </AuthProvider>
     );
 }

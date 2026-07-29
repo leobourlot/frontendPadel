@@ -16,6 +16,14 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '../components/ui/alert-dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '../components/ui/dialog';
 
 const AdminUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
@@ -27,6 +35,13 @@ const AdminUsuarios = () => {
         title: '',
         description: ''
     });
+
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editingUsuario, setEditingUsuario] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        nombre: '', apellido: '', dni: '', email: '', telefono: '', clave: '',
+    });
+    const [savingEdit, setSavingEdit] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -47,6 +62,53 @@ const AdminUsuarios = () => {
             });
         } finally {
             setLoading(false);
+        }
+    };
+
+    // ✅ NUEVO
+    const handleOpenEdit = (usuario) => {
+        setEditingUsuario(usuario);
+        setEditFormData({
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            dni: usuario.dni,
+            email: usuario.email,
+            telefono: usuario.telefono,
+            clave: '', // vacío: si no se completa, no se cambia
+        });
+        setEditDialogOpen(true);
+    };
+
+    // ✅ NUEVO
+    const handleEditChange = (field, value) => {
+        setEditFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    // ✅ NUEVO
+    const handleSubmitEdit = async (e) => {
+        e.preventDefault();
+
+        const payload = { ...editFormData };
+        if (!payload.clave) delete payload.clave; // no mandar clave vacía
+
+        setSavingEdit(true);
+        try {
+            await usuariosService.update(editingUsuario.idUsuario, payload);
+            toast({
+                title: "✅ Usuario actualizado",
+                description: `Los datos de ${payload.nombre} fueron actualizados`,
+            });
+            setEditDialogOpen(false);
+            await loadUsuarios();
+        } catch (error) {
+            console.error('Error actualizando usuario:', error);
+            toast({
+                title: "Error",
+                description: error.message || "No se pudo actualizar el usuario",
+                variant: "destructive",
+            });
+        } finally {
+            setSavingEdit(false);
         }
     };
 
@@ -235,8 +297,8 @@ const AdminUsuarios = () => {
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                         <div className="flex items-center gap-4 flex-1">
                                             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${usuario.rol === 'admin'
-                                                    ? 'bg-amber-500'
-                                                    : 'bg-emerald-500'
+                                                ? 'bg-amber-500'
+                                                : 'bg-emerald-500'
                                                 }`}>
                                                 {usuario.rol === 'admin' ? (
                                                     <ShieldCheck className="w-6 h-6 text-white" />
@@ -251,8 +313,8 @@ const AdminUsuarios = () => {
                                                         {usuario.nombre} {usuario.apellido}
                                                     </h3>
                                                     <span className={`text-xs px-2 py-1 rounded-full ${usuario.rol === 'admin'
-                                                            ? 'bg-amber-500 text-white'
-                                                            : 'bg-blue-500 text-white'
+                                                        ? 'bg-amber-500 text-white'
+                                                        : 'bg-blue-500 text-white'
                                                         }`}>
                                                         {usuario.rol === 'admin' ? '👑 Admin' : '🎾 Jugador'}
                                                     </span>
@@ -272,6 +334,15 @@ const AdminUsuarios = () => {
 
                                         <div className="flex flex-wrap gap-2">
                                             {/* Cambiar rol */}
+                                            <Button
+                                                onClick={() => handleOpenEdit(usuario)}
+                                                variant="outline"
+                                                className="border-white/20 text-white hover:bg-white/10"
+                                                size="sm"
+                                            >
+                                                <Edit className="w-4 h-4 mr-2" />
+                                                Editar
+                                            </Button>
                                             {usuario.rol === 'jugador' ? (
                                                 <Button
                                                     onClick={() => openConfirmDialog(usuario, 'promote')}
@@ -321,6 +392,91 @@ const AdminUsuarios = () => {
                         </div>
                     </motion.div>
                 </div>
+
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                    <DialogContent className="bg-gray-900 text-white border-white/20 max-w-lg max-h-[85vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl">Editar Usuario</DialogTitle>
+                            <DialogDescription className="text-gray-400">
+                                Modificá los datos de {editingUsuario?.nombre} {editingUsuario?.apellido}
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form onSubmit={handleSubmitEdit} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Nombre</Label>
+                                    <Input
+                                        value={editFormData.nombre}
+                                        onChange={(e) => handleEditChange('nombre', e.target.value)}
+                                        className="bg-white/10 border-white/20 text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Apellido</Label>
+                                    <Input
+                                        value={editFormData.apellido}
+                                        onChange={(e) => handleEditChange('apellido', e.target.value)}
+                                        className="bg-white/10 border-white/20 text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">DNI</Label>
+                                    <Input
+                                        value={editFormData.dni}
+                                        onChange={(e) => handleEditChange('dni', e.target.value)}
+                                        className="bg-white/10 border-white/20 text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-gray-300">Teléfono</Label>
+                                    <Input
+                                        value={editFormData.telefono}
+                                        onChange={(e) => handleEditChange('telefono', e.target.value)}
+                                        className="bg-white/10 border-white/20 text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <Label className="text-gray-300">Email</Label>
+                                    <Input
+                                        type="email"
+                                        value={editFormData.email}
+                                        onChange={(e) => handleEditChange('email', e.target.value)}
+                                        className="bg-white/10 border-white/20 text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <Label className="text-gray-300">Nueva contraseña (opcional)</Label>
+                                    <Input
+                                        type="password"
+                                        placeholder="Dejar vacío para no cambiarla"
+                                        value={editFormData.clave}
+                                        onChange={(e) => handleEditChange('clave', e.target.value)}
+                                        className="bg-white/10 border-white/20 text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setEditDialogOpen(false)}
+                                    className="border-white/20 text-white hover:bg-white/10"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={savingEdit}
+                                    className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                                >
+                                    {savingEdit ? 'Guardando...' : 'Guardar cambios'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Dialog de Confirmación */}
                 <AlertDialog
