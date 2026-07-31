@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { Users, Shield, ShieldCheck, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Users, Shield, ShieldCheck, ToggleLeft, ToggleRight, Edit } from 'lucide-react';
 import Layout from '../components/Layout';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input'; // ✅ NUEVO
+import { Label } from '../components/ui/label'; // ✅ NUEVO
 import { useToast } from '../components/ui/use-toast';
 import { usuariosService } from '../services/api.service';
 import {

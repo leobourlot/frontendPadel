@@ -16,18 +16,23 @@ const Login = () => {
     const [dni, setDni] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, loginSuperAdmin, club } = useAuth();
     const navigate = useNavigate();
     const { toast } = useToast();
     const location = useLocation();
-    const { club } = useAuth();
+
+    const [modoSuperAdmin, setModoSuperAdmin] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await login(dni, password);
+            if (modoSuperAdmin) {
+                await loginSuperAdmin(dni, password);
+            } else {
+                await login(dni, password);
+            }
             toast({
                 title: "¡Bienvenido! 🎾",
                 description: "Has iniciado sesión correctamente",
@@ -127,6 +132,14 @@ const Login = () => {
                                     )}
                                 </Button>
                             </form>
+
+                            <button
+                                type="button"
+                                onClick={() => setModoSuperAdmin(!modoSuperAdmin)}
+                                className="text-xs text-gray-400 hover:text-white mt-2"
+                            >
+                                {modoSuperAdmin ? '← Volver a login normal' : 'Acceso Super Admin'}
+                            </button>
 
                             <div className="mt-6 text-center">
                                 <p className="text-gray-300">

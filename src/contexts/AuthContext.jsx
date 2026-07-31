@@ -4,7 +4,7 @@ const AuthContext = createContext(null);
 
 // const API_URL = 'https://api.turnos.bourderweb.com.ar';
 // const API_URL = 'https://backendpadel-n3u9.onrender.com';
-const API_URL = 'https://n8n-bourder-padelturnos.nvtq0w.easypanel.host/';
+const API_URL = 'https://n8n-bourder-padelturnos.nvtq0w.easypanel.host';
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -105,6 +105,32 @@ export const AuthProvider = ({ children }) => {
         return data.usuario;
     };
 
+    const loginSuperAdmin = async (dni, password) => {
+        const response = await fetch(`${API_URL}/auth/superadmin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }, // sin X-Club-Slug
+            body: JSON.stringify({ dni, password }),
+        });
+
+        const textResponse = await response.text();
+
+        if (!response.ok) {
+            let error;
+            try { error = JSON.parse(textResponse); } catch { throw new Error(textResponse || 'Error al iniciar sesión'); }
+            throw new Error(error.message || 'Error al iniciar sesión');
+        }
+
+        const data = JSON.parse(textResponse);
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.usuario));
+        localStorage.removeItem('club'); // el superadmin no tiene club asociado
+        setUser(data.usuario);
+        setClub(null);
+
+        return data.usuario;
+    };
+
     const register = async (userData) => {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
@@ -163,6 +189,7 @@ export const AuthProvider = ({ children }) => {
             user,
             club,        // ← disponible en toda la app
             login,
+            loginSuperAdmin,
             register,
             logout,
             getToken,
