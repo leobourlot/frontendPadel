@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogIn, User } from 'lucide-react';
+import { LogIn, User, ShieldCheck } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -29,10 +29,16 @@ const Login = () => {
 
         try {
             if (modoSuperAdmin) {
-                await loginSuperAdmin(dni, password);
-            } else {
-                await login(dni, password);
+                await loginSuperAdmin(dni, password); // ✅ NUEVO
+                toast({
+                    title: "¡Bienvenido, Super Admin! 👑",
+                    description: "Has iniciado sesión correctamente",
+                });
+                navigate('/superadmin/clubes');
+                return;
             }
+
+            await login(dni, password);
             toast({
                 title: "¡Bienvenido! 🎾",
                 description: "Has iniciado sesión correctamente",
@@ -41,11 +47,11 @@ const Login = () => {
             navigate(from);
         } catch (error) {
             console.error('Error en login:', error);
-
-            // Mensaje específico si el usuario está desactivado
             const errorMessage = error.message.includes('desactivado')
                 ? "Tu cuenta ha sido desactivada. Contacta al administrador."
-                : "DNI o contraseña incorrectos";
+                : modoSuperAdmin
+                    ? "DNI o contraseña incorrectos"
+                    : "DNI o contraseña incorrectos";
 
             toast({
                 title: "Error al iniciar sesión",
@@ -60,7 +66,8 @@ const Login = () => {
     return (
         <>
             <Helmet>
-                <title>{club?.nombre ? `${club.nombre} - Reservas` : 'Club de Pádel'}</title>                <meta name="description" content="Inicia sesión en tu cuenta del club de pádel" />
+                <title>{club?.nombre ? `${club.nombre} - Reservas` : 'Club de Pádel'}</title>
+                <meta name="description" content="Inicia sesión en tu cuenta del club de pádel" />
             </Helmet>
 
             <div className="min-h-screen flex flex-col">
@@ -77,14 +84,16 @@ const Login = () => {
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
                                     transition={{ delay: 0.2, type: "spring" }}
-                                    className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-full mb-4"
+                                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${modoSuperAdmin ? 'bg-amber-500' : 'bg-emerald-500'}`}
                                 >
-                                    <User className="w-8 h-8 text-white" />
+                                    {modoSuperAdmin ? <ShieldCheck className="w-8 h-8 text-white" /> : <User className="w-8 h-8 text-white" />}
                                 </motion.div>
-                                <h1 className="text-3xl font-bold text-white mb-2">Bienvenido</h1>
-                                <p className="text-gray-300">Inicia sesión para reservar tu cancha</p>
-                                <p>Usuario de prueba: 99999999</p>
-                                <p>Contraseña: 123456</p>
+                                <h1 className="text-3xl font-bold text-white mb-2">
+                                    {modoSuperAdmin ? 'Acceso Super Admin' : 'Bienvenido'}
+                                </h1>
+                                <p className="text-gray-300">
+                                    {modoSuperAdmin ? 'Panel de administración general' : 'Inicia sesión para reservar tu cancha'}
+                                </p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
@@ -117,7 +126,7 @@ const Login = () => {
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
+                                    className={`w-full text-white ${modoSuperAdmin ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-500 hover:bg-emerald-600'}`}
                                 >
                                     {loading ? (
                                         <div className="flex items-center gap-2">
@@ -133,21 +142,22 @@ const Login = () => {
                                 </Button>
                             </form>
 
-                            <button
-                                type="button"
-                                onClick={() => setModoSuperAdmin(!modoSuperAdmin)}
-                                className="text-xs text-gray-400 hover:text-white mt-2"
-                            >
-                                {modoSuperAdmin ? '← Volver a login normal' : 'Acceso Super Admin'}
-                            </button>
-
-                            <div className="mt-6 text-center">
-                                <p className="text-gray-300">
-                                    ¿No tienes cuenta?{' '}
-                                    <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold">
-                                        Regístrate aquí
-                                    </Link>
-                                </p>
+                            <div className="mt-6 text-center space-y-2">
+                                {!modoSuperAdmin && (
+                                    <p className="text-gray-300">
+                                        ¿No tienes cuenta?{' '}
+                                        <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold">
+                                            Regístrate aquí
+                                        </Link>
+                                    </p>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => setModoSuperAdmin(!modoSuperAdmin)}
+                                    className="text-xs text-gray-400 hover:text-white"
+                                >
+                                    {modoSuperAdmin ? '← Volver a login normal' : 'Acceso Super Admin'}
+                                </button>
                             </div>
                         </div>
                     </motion.div>

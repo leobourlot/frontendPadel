@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { Building2, Plus, Mail, Phone, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { Building2, Plus, Mail, Phone, Calendar, CheckCircle, XCircle, Edit, Power, Clock } from 'lucide-react';
 import Layout from '../components/Layout';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useToast } from '../components/ui/use-toast';
-import { clubesService } from '../services/api.service';
+import { clubesService, horariosClubService } from '../services/api.service';
 import {
     Dialog,
     DialogContent,
@@ -16,6 +16,27 @@ import {
     DialogHeader,
     DialogTitle,
 } from '../components/ui/dialog';
+
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+} from '../components/ui/alert-dialog';
+
+const DIAS_SEMANA = [
+    { valor: 1, nombre: 'Lunes' },
+    { valor: 2, nombre: 'Martes' },
+    { valor: 3, nombre: 'Miércoles' },
+    { valor: 4, nombre: 'Jueves' },
+    { valor: 5, nombre: 'Viernes' },
+    { valor: 6, nombre: 'Sábado' },
+    { valor: 0, nombre: 'Domingo' },
+];
 
 const SuperAdminClubes = () => {
     const [clubes, setClubes] = useState([]);
@@ -30,6 +51,12 @@ const SuperAdminClubes = () => {
     const [savingEdit, setSavingEdit] = useState(false);
 
     const [toggleDialog, setToggleDialog] = useState({ open: false, club: null });
+
+    const [horariosDialogOpen, setHorariosDialogOpen] = useState(false);
+    const [horariosClub, setHorariosClub] = useState(null);
+    const [horariosData, setHorariosData] = useState([]);
+    const [loadingHorarios, setLoadingHorarios] = useState(false);
+    const [savingHorarios, setSavingHorarios] = useState(false);
 
 
     const initialForm = {
@@ -207,6 +234,66 @@ const SuperAdminClubes = () => {
         }
     };
 
+    const handleOpenHorarios = async (club) => {
+        setHorariosClub(club);
+        setHorariosDialogOpen(true);
+        setLoadingHorarios(true);
+        try {
+            const data = await horariosClubService.getByClub(club.idClub);
+            // Ordenar según DIAS_SEMANA (lunes primero) y asegurar que estén los 7 días
+            const ordenado = DIAS_SEMANA.map(dia => {
+                const existente = data.find(h => h.diaSemana === dia.valor);
+                return existente || {
+                    diaSemana: dia.valor,
+                    horaInicio: '08:00',
+                    horaFin: '23:00',
+                    duracionTurno: 90,
+                    activo: true,
+                };
+            });
+            setHorariosData(ordenado);
+        } catch (error) {
+            console.error('Error cargando horarios:', error);
+            toast({
+                title: "Error",
+                description: "No se pudieron cargar los horarios del club",
+                variant: "destructive",
+            });
+        } finally {
+            setLoadingHorarios(false);
+        }
+    };
+
+    // ✅ NUEVO
+    const handleHorarioChange = (diaSemana, campo, valor) => {
+        setHorariosData(prev => prev.map(h =>
+            h.diaSemana === diaSemana ? { ...h, [campo]: valor } : h
+        ));
+    };
+
+    // ✅ NUEVO
+    const handleSubmitHorarios = async (e) => {
+        e.preventDefault();
+        setSavingHorarios(true);
+        try {
+            await horariosClubService.update(horariosClub.idClub, horariosData);
+            toast({
+                title: "✅ Horarios actualizados",
+                description: `Los horarios de ${horariosClub.nombre} fueron guardados correctamente`,
+            });
+            setHorariosDialogOpen(false);
+        } catch (error) {
+            console.error('Error guardando horarios:', error);
+            toast({
+                title: "Error",
+                description: error.message || "No se pudieron guardar los horarios",
+                variant: "destructive",
+            });
+        } finally {
+            setSavingHorarios(false);
+        }
+    };
+
     if (loading) {
         return (
             <Layout>
@@ -307,6 +394,15 @@ const SuperAdminClubes = () => {
                                             >
                                                 <Edit className="w-4 h-4 mr-2" />
                                                 Editar
+                                            </Button>
+                                            <Button
+                                                onClick={() => handleOpenHorarios(club)}
+                                                variant="outline"
+                                                size="sm"
+                                                className="border-white/20 text-white hover:bg-white/10"
+                                            >
+                                                <Clock className="w-4 h-4 mr-2" />
+                                                Horarios
                                             </Button>
                                             <Button
                                                 onClick={() => setToggleDialog({ open: true, club })}
@@ -618,6 +714,95 @@ const SuperAdminClubes = () => {
                     </DialogContent>
                 </Dialog>
 
+                <Dialog open={horariosDialogOpen} onOpenChange={setHorariosDialogOpen}>
+                    <DialogContent className="bg-gray-900 text-white border-white/20 max-w-3xl max-h-[85vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl">Horarios de atención</DialogTitle>
+                            <DialogDescription className="text-gray-400">
+                                Configurá el horario y duración de turnos para {horariosClub?.nombre}, día por día
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        {loadingHorarios ? (
+                            <div className="flex items-center justify-center py-12">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmitHorarios} className="space-y-3">
+                                {horariosData.map((horario) => {
+                                    const nombreDia = DIAS_SEMANA.find(d => d.valor === horario.diaSemana)?.nombre;
+                                    return (
+                                        <div
+                                            key={horario.diaSemana}
+                                            className={`grid grid-cols-12 gap-2 items-center p-3 rounded-lg border ${horario.activo ? 'bg-white/5 border-white/10' : 'bg-white/5 border-white/5 opacity-50'}`}
+                                        >
+                                            <div className="col-span-2 flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={horario.activo}
+                                                    onChange={(e) => handleHorarioChange(horario.diaSemana, 'activo', e.target.checked)}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-sm font-medium">{nombreDia}</span>
+                                            </div>
+                                            <div className="col-span-3">
+                                                <Label className="text-xs text-gray-400">Desde</Label>
+                                                <Input
+                                                    type="time"
+                                                    value={horario.horaInicio}
+                                                    onChange={(e) => handleHorarioChange(horario.diaSemana, 'horaInicio', e.target.value)}
+                                                    disabled={!horario.activo}
+                                                    className="bg-white/10 border-white/20 text-white h-9"
+                                                />
+                                            </div>
+                                            <div className="col-span-3">
+                                                <Label className="text-xs text-gray-400">Hasta</Label>
+                                                <Input
+                                                    type="time"
+                                                    value={horario.horaFin}
+                                                    onChange={(e) => handleHorarioChange(horario.diaSemana, 'horaFin', e.target.value)}
+                                                    disabled={!horario.activo}
+                                                    className="bg-white/10 border-white/20 text-white h-9"
+                                                />
+                                            </div>
+                                            <div className="col-span-4">
+                                                <Label className="text-xs text-gray-400">Duración turno (min)</Label>
+                                                <Input
+                                                    type="number"
+                                                    min={15}
+                                                    step={15}
+                                                    value={horario.duracionTurno}
+                                                    onChange={(e) => handleHorarioChange(horario.diaSemana, 'duracionTurno', parseInt(e.target.value) || 90)}
+                                                    disabled={!horario.activo}
+                                                    className="bg-white/10 border-white/20 text-white h-9"
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                <DialogFooter className="pt-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setHorariosDialogOpen(false)}
+                                        className="border-white/20 text-white hover:bg-white/10"
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={savingHorarios}
+                                        className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                                    >
+                                        {savingHorarios ? 'Guardando...' : 'Guardar horarios'}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        )}
+                    </DialogContent>
+                </Dialog>
+                
                 {/* ✅ NUEVO: Confirmación activar/desactivar */}
                 <AlertDialog open={toggleDialog.open} onOpenChange={(open) => setToggleDialog({ open, club: toggleDialog.club })}>
                     <AlertDialogContent>
@@ -642,7 +827,7 @@ const SuperAdminClubes = () => {
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
-                </ AlertDialog>
+                </AlertDialog>
             </Layout>
         </>
     );

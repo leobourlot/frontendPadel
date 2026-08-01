@@ -50,6 +50,11 @@ const Reservas = () => {
         }
     }, [selectedDate, selectedCancha]);
 
+    // Helper: determina si una reserva existente pertenece al usuario logueado
+    const getIdUsuarioDeReserva = (reserva) => {
+        return reserva.idUsuario ?? reserva.usuario?.idUsuario ?? null;
+    };
+
     const loadHorariosDisponibles = async () => {
         try {
             const fechaFormateada = format(selectedDate, 'yyyy-MM-dd');
@@ -60,14 +65,9 @@ const Reservas = () => {
                 fechaFormateada
             );
 
-            // console.log('📅 Reservas existentes:', reservasExistentes); // ← AGREGAR
-
             const ahora = new Date();
             const horaActual = format(ahora, 'HH:mm');
             const esHoy = format(selectedDate, 'yyyy-MM-dd') === format(ahora, 'yyyy-MM-dd');
-
-            // console.log('🕐 Hora actual:', horaActual);
-            // console.log('📆 ¿Es hoy?', esHoy);
 
             // Generar horarios de 8:00 a 23:00 cada 90 minutos
             const horariosGenerados = [];
@@ -82,32 +82,31 @@ const Reservas = () => {
 
                 // ✅ Si es hoy, ocultar horarios pasados
                 if (esHoy && horaInicio < horaActual) {
-                    // console.log(`⏰ ${horaInicio}: ⏭️ PASADO - Omitiendo`);
                     continue; // No agregar este horario
                 }
 
-                // Verificar si el horario está ocupado
-                const estaOcupado = reservasExistentes.some(reserva => {
+                // Buscar si el horario está ocupado (y por quién)
+                const reservaQueOcupa = reservasExistentes.find(reserva => {
                     const horaReservaNormalizada = reserva.horaInicio.includes(':')
                         ? reserva.horaInicio.substring(0, 5)
                         : reserva.horaInicio;
 
-                    const match = horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
-
-                    if (match) {
-                        // console.log('✅ MATCH encontrado:', horaInicio);
-                    }
-
-                    return match;
+                    return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
                 });
 
-                // console.log(`⏰ ${horaInicio}: ${estaOcupado ? '❌ OCUPADO' : '✅ DISPONIBLE'}`);
+                const estaOcupado = !!reservaQueOcupa;
+                const esMiReserva = !!(
+                    estaOcupado &&
+                    user &&
+                    getIdUsuarioDeReserva(reservaQueOcupa) === user.idUsuario
+                );
 
                 horariosGenerados.push({
                     id: horariosGenerados.length + 1,
                     horaInicio,
                     horaFin,
-                    disponible: !estaOcupado
+                    disponible: !estaOcupado,
+                    esMiReserva
                 });
             }
 
@@ -126,7 +125,8 @@ const Reservas = () => {
                     id: horariosDefault.length + 1,
                     horaInicio: format(startTime, 'HH:mm'),
                     horaFin: format(endTime, 'HH:mm'),
-                    disponible: true
+                    disponible: true,
+                    esMiReserva: false
                 });
             }
             setHorarios(horariosDefault);
@@ -175,6 +175,8 @@ const Reservas = () => {
             toast({
                 title: "¡Reserva confirmada! 🎾",
                 description: "Tu cancha ha sido reservada exitosamente",
+                className: 'fixed top-1/2 left-1/2 z-[101] w-full max-w-[420px] h-[200px] bg-zinc-800 -translate-x-1/2 -translate-y-1/2 rounded-lg p-4',
+
             });
 
             // Limpiar selección y recargar horarios
@@ -235,18 +237,26 @@ const Reservas = () => {
 
                     if (esHoy && horaInicio < horaActual) continue;
 
-                    const estaOcupado = reservasExistentes.some(reserva => {
+                    const reservaQueOcupa = reservasExistentes.find(reserva => {
                         const horaReservaNormalizada = reserva.horaInicio.includes(':')
                             ? reserva.horaInicio.substring(0, 5)
                             : reserva.horaInicio;
                         return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
                     });
 
+                    const estaOcupado = !!reservaQueOcupa;
+                    const esMiReserva = !!(
+                        estaOcupado &&
+                        user &&
+                        getIdUsuarioDeReserva(reservaQueOcupa) === user.idUsuario
+                    );
+
                     horariosGenerados.push({
                         id: horariosGenerados.length + 1,
                         horaInicio,
                         horaFin,
-                        disponible: !estaOcupado
+                        disponible: !estaOcupado,
+                        esMiReserva
                     });
                 }
 
@@ -357,14 +367,34 @@ const Reservas = () => {
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                 >
-                                    <Label className="text-white mb-3 block">
-                                        <Clock className="w-4 h-4 inline mr-2" />
-                                        Horarios Disponibles (90 minutos)
-                                    </Label>
+                                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                                        <Label className="text-white block">
+                                            <Clock className="w-4 h-4 inline mr-2" />
+                                            Horarios Disponibles (90 minutos)
+                                        </Label>
+
+                                        {/* Referencia de colores */}
+                                        <div className="flex items-center gap-4 text-xs text-gray-300">
+                                            <span className="flex items-center gap-1">
+                                                <span className="w-3 h-3 rounded-sm bg-white/10 border border-white/20 inline-block" />
+                                                Disponible
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="w-3 h-3 rounded-sm bg-blue-500/30 border border-blue-400 inline-block" />
+                                                Tu turno
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="w-3 h-3 rounded-sm bg-gray-800 border border-gray-600 inline-block" />
+                                                Ocupado
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                         {horarios.map((horario) => {
                                             const isSelected = selectedHorario?.id === horario.id;
                                             const isAvailable = horario.disponible;
+                                            const esMiReserva = horario.esMiReserva;
 
                                             return (
                                                 <button
@@ -373,14 +403,18 @@ const Reservas = () => {
                                                     disabled={!isAvailable}
                                                     className={`p-4 rounded-lg border transition-all ${isSelected
                                                         ? 'bg-emerald-500 border-emerald-400 text-white'
-                                                        : isAvailable
-                                                            ? 'bg-white/5 border-white/20 text-white hover:bg-white/10'
-                                                            : 'bg-gray-800 border-gray-600 text-gray-400 cursor-not-allowed'
+                                                        : esMiReserva
+                                                            ? 'bg-blue-500/20 border-blue-400 text-blue-200 cursor-not-allowed'
+                                                            : isAvailable
+                                                                ? 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                                                                : 'bg-gray-800 border-gray-600 text-gray-400 cursor-not-allowed'
                                                         }`}
                                                 >
                                                     <p className="font-semibold">{horario.horaInicio}</p>
                                                     <p className="text-xs mt-1">a {horario.horaFin}</p>
-                                                    {!isAvailable && (
+                                                    {esMiReserva ? (
+                                                        <p className="text-xs mt-2 text-blue-300 font-semibold">Tu turno</p>
+                                                    ) : !isAvailable && (
                                                         <p className="text-xs mt-2 text-red-400 font-semibold">No disponible</p>
                                                     )}
                                                 </button>

@@ -362,7 +362,7 @@ const ReservasRecurrentes = () => {
 
                 {/* Dialog para crear */}
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogContent className="bg-gray-900 text-white border-white/20 max-w-2xl">
+                    <DialogContent className="bg-gray-900 text-gray-200 border-white/20 max-w-2xl">
                         <DialogHeader>
                             <DialogTitle className="text-2xl flex items-center gap-2">
                                 <Repeat className="w-6 h-6 text-emerald-500" />
@@ -376,14 +376,14 @@ const ReservasRecurrentes = () => {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="cancha" className="text-gray-600">
+                                    <Label htmlFor="cancha" className="text-gray-200">
                                         Cancha *
                                     </Label>
                                     <Select
                                         value={formData.idCancha}
                                         onValueChange={(value) => setFormData({ ...formData, idCancha: value })}
                                     >
-                                        <SelectTrigger className="bg-white/10 border-white/20 text-gray-800">
+                                        <SelectTrigger className="bg-white/10 border-white/20 text-gray-200">
                                             <SelectValue placeholder="Selecciona cancha" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -397,14 +397,14 @@ const ReservasRecurrentes = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="diaSemana" className="text-gray-600">
+                                    <Label htmlFor="diaSemana" className="text-gray-200">
                                         Día de la semana *
                                     </Label>
                                     <Select
                                         value={formData.diaSemana}
                                         onValueChange={(value) => setFormData({ ...formData, diaSemana: value })}
                                     >
-                                        <SelectTrigger className="bg-white/10 border-white/20 text-gray-800">
+                                        <SelectTrigger className="bg-white/10 border-white/20 text-gray-200">
                                             <SelectValue placeholder="Selecciona día" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -419,14 +419,14 @@ const ReservasRecurrentes = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="horaInicio" className="text-gray-600">
+                                <Label htmlFor="horaInicio" className="text-gray-200">
                                     Hora *
                                 </Label>
                                 <Select
                                     value={formData.horaInicio}
                                     onValueChange={(value) => setFormData({ ...formData, horaInicio: value })}
                                 >
-                                    <SelectTrigger className="bg-white/10 border-white/20 text-gray-800">
+                                    <SelectTrigger className="bg-white/10 border-white/20 text-gray-200">
                                         <SelectValue placeholder="Selecciona horario" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -440,7 +440,7 @@ const ReservasRecurrentes = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="fechaInicio" className="text-gray-600">
+                                <Label htmlFor="fechaInicio" className="text-gray-200">
                                     Fecha de inicio *
                                 </Label>
                                 <Input
@@ -449,7 +449,7 @@ const ReservasRecurrentes = () => {
                                     value={formData.fechaInicio}
                                     onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
                                     min={format(new Date(), 'yyyy-MM-dd')}
-                                    className="bg-white/10 border-white/20 text-gray-800"
+                                    className="bg-white/10 border-white/20 text-gray-200"
                                 />
                                 <p className="text-xs text-gray-400">
                                     Debe ser un {formData.diaSemana ? getDiaNombre(parseInt(formData.diaSemana)) : 'día de la semana seleccionado'}
@@ -465,7 +465,7 @@ const ReservasRecurrentes = () => {
                                         onChange={(e) => setFormData({ ...formData, tieneFinalizacion: e.target.checked })}
                                         className="w-4 h-4"
                                     />
-                                    <Label htmlFor="tieneFinalizacion" className="text-gray-600 cursor-pointer">
+                                    <Label htmlFor="tieneFinalizacion" className="text-gray-200 cursor-pointer">
                                         Establecer fecha de finalización
                                     </Label>
                                 </div>
@@ -475,7 +475,7 @@ const ReservasRecurrentes = () => {
                                         value={formData.fechaFin}
                                         onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
                                         min={formData.fechaInicio}
-                                        className="bg-white/10 border-white/20 text-gray-800"
+                                        className="bg-white/10 border-white/20 text-gray-200"
                                     />
                                 )}
                             </div>
@@ -485,13 +485,13 @@ const ReservasRecurrentes = () => {
                                     type="button"
                                     variant="outline"
                                     onClick={() => setDialogOpen(false)}
-                                    className="border-white/20 text-white hover:bg-white/10"
+                                    className="border-white/20 text-gray-200 hover:bg-white/10"
                                 >
                                     Cancelar
                                 </Button>
                                 <Button
                                     type="submit"
-                                    className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                                    className="bg-emerald-500 hover:bg-emerald-600 text-gray-200"
                                 >
                                     Crear Reserva Recurrente
                                 </Button>

@@ -175,4 +175,16 @@ export const clubesService = {
     delete: (id) => fetchWithAuth(`/clubes/${id}`, { method: 'DELETE' }),
 };
 
-export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService };
+// ====================================
+// SERVICIOS DE HORARIOS POR CLUB (superadmin)
+// ====================================
+export const horariosClubService = {
+    getActual: () => fetchWithAuth('/horarios-club'),
+    getByClub: (idClub) => fetchWithAuth(`/horarios-club/${idClub}`),
+    update: (idClub, horarios) => fetchWithAuth(`/horarios-club/${idClub}`, {
+        method: 'PUT',
+        body: JSON.stringify({ horarios }),
+    }),
+};
+
+export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService, horariosClub: horariosClubService };
