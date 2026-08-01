@@ -12,6 +12,8 @@ import { format, addDays, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { canchasService, reservasService } from '../services/api.service';
 import { useNavigate } from 'react-router-dom'; // agregar si no está
+import { generarHorariosDelDia } from '../utils/horarios'; // ✅ NUEVO
+
 
 const Reservas = () => {
     const navigate = useNavigate();
@@ -20,6 +22,7 @@ const Reservas = () => {
     const [selectedHorario, setSelectedHorario] = useState(null);
     const [canchas, setCanchas] = useState([]);
     const [horarios, setHorarios] = useState([]);
+    const [horariosClub, setHorariosClub] = useState([]); // ✅ NUEVO: config del club
     const [loading, setLoading] = useState(false);
     const { user } = useAuth();
     const { toast } = useToast();
@@ -41,6 +44,18 @@ const Reservas = () => {
         };
 
         loadCanchas();
+    }, []);
+
+    useEffect(() => {
+        const loadHorariosClub = async () => {
+            try {
+                const data = await horariosClubService.getActual();
+                setHorariosClub(data);
+            } catch (error) {
+                console.error('Error cargando horarios del club:', error);
+            }
+        };
+        loadHorariosClub();
     }, []);
 
     // Cargar horarios disponibles cuando se selecciona cancha y fecha
@@ -69,67 +84,89 @@ const Reservas = () => {
             const horaActual = format(ahora, 'HH:mm');
             const esHoy = format(selectedDate, 'yyyy-MM-dd') === format(ahora, 'yyyy-MM-dd');
 
-            // Generar horarios de 8:00 a 23:00 cada 90 minutos
-            const horariosGenerados = [];
-            for (let hour = 8; hour <= 22; hour += 1.5) {
-                const wholeHour = Math.floor(hour);
-                const minutes = (hour % 1) * 60;
-                const startTime = setMinutes(setHours(selectedDate, wholeHour), minutes);
-                const endTime = new Date(startTime.getTime() + 90 * 60000);
+            const bloques = generarHorariosDelDia(horariosClub, selectedDate);
 
-                const horaInicio = format(startTime, 'HH:mm');
-                const horaFin = format(endTime, 'HH:mm');
+            const horariosGenerados = bloques
+                .filter(({ horaInicio }) => !(esHoy && horaInicio < horaActual))
+                .map(({ horaInicio, horaFin }, index) => {
+                    const estaOcupado = reservasExistentes.some(reserva => {
+                        const horaReservaNormalizada = reserva.horaInicio.includes(':')
+                            ? reserva.horaInicio.substring(0, 5)
+                            : reserva.horaInicio;
+                        return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+                    });
 
-                // ✅ Si es hoy, ocultar horarios pasados
-                if (esHoy && horaInicio < horaActual) {
-                    continue; // No agregar este horario
-                }
-
-                // Buscar si el horario está ocupado (y por quién)
-                const reservaQueOcupa = reservasExistentes.find(reserva => {
-                    const horaReservaNormalizada = reserva.horaInicio.includes(':')
-                        ? reserva.horaInicio.substring(0, 5)
-                        : reserva.horaInicio;
-
-                    return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+                    return {
+                        id: index + 1,
+                        horaInicio,
+                        horaFin,
+                        disponible: !estaOcupado,
+                    };
                 });
-
-                const estaOcupado = !!reservaQueOcupa;
-                const esMiReserva = !!(
-                    estaOcupado &&
-                    user &&
-                    getIdUsuarioDeReserva(reservaQueOcupa) === user.idUsuario
-                );
-
-                horariosGenerados.push({
-                    id: horariosGenerados.length + 1,
-                    horaInicio,
-                    horaFin,
-                    disponible: !estaOcupado,
-                    esMiReserva
-                });
-            }
 
             setHorarios(horariosGenerados);
+            // const horariosGenerados = [];
+            // for (let hour = 8; hour <= 22; hour += 1.5) {
+            //     const wholeHour = Math.floor(hour);
+            //     const minutes = (hour % 1) * 60;
+            //     const startTime = setMinutes(setHours(selectedDate, wholeHour), minutes);
+            //     const endTime = new Date(startTime.getTime() + 90 * 60000);
+
+            //     const horaInicio = format(startTime, 'HH:mm');
+            //     const horaFin = format(endTime, 'HH:mm');
+
+            //     // ✅ Si es hoy, ocultar horarios pasados
+            //     if (esHoy && horaInicio < horaActual) {
+            //         continue; // No agregar este horario
+            //     }
+
+            //     // Buscar si el horario está ocupado (y por quién)
+            //     const reservaQueOcupa = reservasExistentes.find(reserva => {
+            //         const horaReservaNormalizada = reserva.horaInicio.includes(':')
+            //             ? reserva.horaInicio.substring(0, 5)
+            //             : reserva.horaInicio;
+
+            //         return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+            //     });
+
+            //     const estaOcupado = !!reservaQueOcupa;
+            //     const esMiReserva = !!(
+            //         estaOcupado &&
+            //         user &&
+            //         getIdUsuarioDeReserva(reservaQueOcupa) === user.idUsuario
+            //     );
+
+            //     horariosGenerados.push({
+            //         id: horariosGenerados.length + 1,
+            //         horaInicio,
+            //         horaFin,
+            //         disponible: !estaOcupado,
+            //         esMiReserva
+            //     });
+            // }
+
+            // setHorarios(horariosGenerados);
         } catch (error) {
             console.error('Error cargando horarios:', error);
+            const bloques = generarHorariosDelDia(horariosClub, selectedDate);
+            setHorarios(bloques.map((b, index) => ({ id: index + 1, ...b, disponible: true })));
             // Si hay error, generar horarios por defecto sin verificar disponibilidad
-            const horariosDefault = [];
-            for (let hour = 8; hour <= 22; hour += 1.5) {
-                const wholeHour = Math.floor(hour);
-                const minutes = (hour % 1) * 60;
-                const startTime = setMinutes(setHours(selectedDate, wholeHour), minutes);
-                const endTime = new Date(startTime.getTime() + 90 * 60000);
+            // const horariosDefault = [];
+            // for (let hour = 8; hour <= 22; hour += 1.5) {
+            //     const wholeHour = Math.floor(hour);
+            //     const minutes = (hour % 1) * 60;
+            //     const startTime = setMinutes(setHours(selectedDate, wholeHour), minutes);
+            //     const endTime = new Date(startTime.getTime() + 90 * 60000);
 
-                horariosDefault.push({
-                    id: horariosDefault.length + 1,
-                    horaInicio: format(startTime, 'HH:mm'),
-                    horaFin: format(endTime, 'HH:mm'),
-                    disponible: true,
-                    esMiReserva: false
-                });
-            }
-            setHorarios(horariosDefault);
+            //     horariosDefault.push({
+            //         id: horariosDefault.length + 1,
+            //         horaInicio: format(startTime, 'HH:mm'),
+            //         horaFin: format(endTime, 'HH:mm'),
+            //         disponible: true,
+            //         esMiReserva: false
+            //     });
+            // }
+            // setHorarios(horariosDefault);
         }
     };
 
@@ -197,7 +234,7 @@ const Reservas = () => {
     useEffect(() => {
         const restaurarSeleccion = async () => {
             const pendingRaw = sessionStorage.getItem('pendingSeleccion');
-            if (!pendingRaw || !user) return;
+            if (!pendingRaw || !user || horariosClub.length === 0) return; // ✅ agregado chequeo de horariosClub
 
             const pending = JSON.parse(pendingRaw);
             sessionStorage.removeItem('pendingSeleccion');
@@ -226,41 +263,56 @@ const Reservas = () => {
                 const horaActual = format(ahora, 'HH:mm');
                 const esHoy = fechaFormateada === format(ahora, 'yyyy-MM-dd');
 
-                const horariosGenerados = [];
-                for (let hour = 8; hour <= 22; hour += 1.5) {
-                    const wholeHour = Math.floor(hour);
-                    const minutes = (hour % 1) * 60;
-                    const startTime = setMinutes(setHours(fechaRestaurada, wholeHour), minutes);
-                    const endTime = new Date(startTime.getTime() + 90 * 60000);
-                    const horaInicio = format(startTime, 'HH:mm');
-                    const horaFin = format(endTime, 'HH:mm');
-
-                    if (esHoy && horaInicio < horaActual) continue;
-
-                    const reservaQueOcupa = reservasExistentes.find(reserva => {
-                        const horaReservaNormalizada = reserva.horaInicio.includes(':')
-                            ? reserva.horaInicio.substring(0, 5)
-                            : reserva.horaInicio;
-                        return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+                const bloques = generarHorariosDelDia(horariosClub, fechaRestaurada);
+                const horariosGenerados = bloques
+                    .filter(({ horaInicio }) => !(esHoy && horaInicio < horaActual))
+                    .map(({ horaInicio, horaFin }, index) => {
+                        const estaOcupado = reservasExistentes.some(reserva => {
+                            const horaReservaNormalizada = reserva.horaInicio.includes(':')
+                                ? reserva.horaInicio.substring(0, 5)
+                                : reserva.horaInicio;
+                            return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+                        });
+                        return { id: index + 1, horaInicio, horaFin, disponible: !estaOcupado };
                     });
-
-                    const estaOcupado = !!reservaQueOcupa;
-                    const esMiReserva = !!(
-                        estaOcupado &&
-                        user &&
-                        getIdUsuarioDeReserva(reservaQueOcupa) === user.idUsuario
-                    );
-
-                    horariosGenerados.push({
-                        id: horariosGenerados.length + 1,
-                        horaInicio,
-                        horaFin,
-                        disponible: !estaOcupado,
-                        esMiReserva
-                    });
-                }
 
                 setHorarios(horariosGenerados);
+
+                // const horariosGenerados = [];
+                // for (let hour = 8; hour <= 22; hour += 1.5) {
+                //     const wholeHour = Math.floor(hour);
+                //     const minutes = (hour % 1) * 60;
+                //     const startTime = setMinutes(setHours(fechaRestaurada, wholeHour), minutes);
+                //     const endTime = new Date(startTime.getTime() + 90 * 60000);
+                //     const horaInicio = format(startTime, 'HH:mm');
+                //     const horaFin = format(endTime, 'HH:mm');
+
+                //     if (esHoy && horaInicio < horaActual) continue;
+
+                //     const reservaQueOcupa = reservasExistentes.find(reserva => {
+                //         const horaReservaNormalizada = reserva.horaInicio.includes(':')
+                //             ? reserva.horaInicio.substring(0, 5)
+                //             : reserva.horaInicio;
+                //         return horaReservaNormalizada === horaInicio && reserva.estado === 'confirmada';
+                //     });
+
+                //     const estaOcupado = !!reservaQueOcupa;
+                //     const esMiReserva = !!(
+                //         estaOcupado &&
+                //         user &&
+                //         getIdUsuarioDeReserva(reservaQueOcupa) === user.idUsuario
+                //     );
+
+                //     horariosGenerados.push({
+                //         id: horariosGenerados.length + 1,
+                //         horaInicio,
+                //         horaFin,
+                //         disponible: !estaOcupado,
+                //         esMiReserva
+                //     });
+                // }
+
+                // setHorarios(horariosGenerados);
 
                 // Preseleccionar el horario elegido antes, solo si sigue disponible
                 const horarioPrevio = horariosGenerados.find(h => h.horaInicio === pending.horaInicio);
@@ -283,7 +335,7 @@ const Reservas = () => {
         };
 
         restaurarSeleccion();
-    }, [user]);
+    }, [user, horariosClub]); // ✅ agregado horariosClub como dependencia
 
     const nextDays = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
 
