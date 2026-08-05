@@ -13,6 +13,7 @@ import { es } from 'date-fns/locale';
 import { canchasService, reservasService, horariosClubService } from '../services/api.service';
 import { useNavigate } from 'react-router-dom';
 import { generarHorariosDelDia } from '../utils/horarios';
+import PagoReservaModal from '../components/PagoReservaModal'; // ✅ NUEVO
 
 const Reservas = () => {
     const navigate = useNavigate();
@@ -23,7 +24,8 @@ const Reservas = () => {
     const [horarios, setHorarios] = useState([]);
     const [horariosClub, setHorariosClub] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { user } = useAuth();
+    const [modalPagoOpen, setModalPagoOpen] = useState(false); // ✅ NUEVO
+    const { user, club } = useAuth(); // ✅ CAMBIADO: se agregó "club"
     const { toast } = useToast();
 
     useEffect(() => {
@@ -110,7 +112,8 @@ const Reservas = () => {
         }
     };
 
-    const handleReserva = async () => {
+    // ✅ CAMBIADO: ya no crea la reserva acá. Solo valida y abre el modal.
+    const handleReserva = () => {
         if (!selectedCancha || !selectedHorario) {
             toast({
                 title: "Error",
@@ -137,35 +140,23 @@ const Reservas = () => {
             return;
         }
 
-        setLoading(true);
-        try {
-            const reservaData = {
-                idCancha: parseInt(selectedCancha),
-                fechaReserva: format(selectedDate, 'yyyy-MM-dd'),
-                horaInicio: selectedHorario.horaInicio,
-                horaFin: selectedHorario.horaFin
-            };
+        setModalPagoOpen(true); // ✅ NUEVO: en vez de crear la reserva, abre el modal
+    };
 
-            await reservasService.create(reservaData);
+    // ✅ NUEVO: datos que necesita el modal para mostrar cancha y armar la reserva
+    const canchaSeleccionada = canchas.find(c => c.idCancha === parseInt(selectedCancha));
 
-            toast({
-                title: "¡Reserva confirmada! 🎾",
-                description: "Tu cancha ha sido reservada exitosamente",
-                className: 'fixed top-1/2 left-1/2 z-[101] w-full max-w-[420px] h-[200px] bg-zinc-800 -translate-x-1/2 -translate-y-1/2 rounded-lg p-4',
-            });
+    const reservaDataParaModal = selectedCancha && selectedHorario ? {
+        idCancha: parseInt(selectedCancha),
+        fechaReserva: format(selectedDate, 'yyyy-MM-dd'),
+        horaInicio: selectedHorario.horaInicio,
+        horaFin: selectedHorario.horaFin,
+    } : null;
 
-            setSelectedHorario(null);
-            await loadHorariosDisponibles();
-        } catch (error) {
-            console.error('Error creando reserva:', error);
-            toast({
-                title: "Error",
-                description: error.message || "No se pudo crear la reserva",
-                variant: "destructive",
-            });
-        } finally {
-            setLoading(false);
-        }
+    // ✅ NUEVO: qué pasa cuando el modal confirma la reserva sin MercadoPago
+    const handleReservaConfirmada = () => {
+        setSelectedHorario(null);
+        loadHorariosDisponibles();
     };
 
     useEffect(() => {
@@ -398,6 +389,17 @@ const Reservas = () => {
                         </div>
                     </motion.div>
                 </div>
+
+                {/* ✅ NUEVO: Modal de pago/confirmación */}
+                <PagoReservaModal
+                    open={modalPagoOpen}
+                    onOpenChange={setModalPagoOpen}
+                    reservaData={reservaDataParaModal}
+                    cancha={canchaSeleccionada}
+                    club={club}
+                    user={user}
+                    onConfirmada={handleReservaConfirmada}
+                />
             </Layout>
         </>
     );

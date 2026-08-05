@@ -187,4 +187,15 @@ export const horariosClubService = {
     }),
 };
 
-export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService, horariosClub: horariosClubService };
+// ====================================
+// SERVICIOS DE PAGOS
+// ====================================
+
+export const pagosService = {
+    crearPreferencia: (reservaData) => fetchWithAuth('/pagos/crear-preferencia', {
+        method: 'POST',
+        body: JSON.stringify(reservaData),
+    }),
+};
+
+export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService, horariosClub: horariosClubService, pagos: pagosService };
