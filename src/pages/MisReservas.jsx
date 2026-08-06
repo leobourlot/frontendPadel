@@ -73,7 +73,7 @@ const MisReservas = () => {
         if (!reservaToDelete) return;
 
         try {
-            await reservasService.delete(reservaToDelete);
+            await reservasService.cancel(reservaToDelete);
 
             // Actualizar la lista local
             setReservas(reservas.filter(r => r.idReserva !== reservaToDelete));

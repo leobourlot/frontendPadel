@@ -174,12 +174,19 @@ const SuperAdminClubes = () => {
             twitterUrl: club.twitterUrl || '',
             horarioSemana: club.horarioSemana || '',
             horarioFinde: club.horarioFinde || '',
+            mercadopagoHabilitado: club.mercadopagoHabilitado || false, // ✅ NUEVO
+            mercadopagoAccessToken: club.mercadopagoAccessToken || '',  // ✅ NUEVO
+            precioReserva: club.precioReserva || '',
         });
         setEditDialogOpen(true);
     };
 
     // ✅ NUEVO
     const handleEditChange = (field, value) => {
+        if (field === 'precioReserva') {
+            setEditFormData(prev => ({ ...prev, [field]: value === '' ? '' : Number(value) }));
+            return;
+        }
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -692,7 +699,52 @@ const SuperAdminClubes = () => {
                                     />
                                 </div>
                             </div>
+                            <div className="pt-2 border-t border-white/10">
+                                <h4 className="text-emerald-400 font-semibold mb-3 mt-4">Cobro con Mercado Pago</h4>
 
+                                <div className="flex items-center gap-2 mb-4">
+                                    <input
+                                        type="checkbox"
+                                        id="mercadopagoHabilitado"
+                                        checked={editFormData.mercadopagoHabilitado}
+                                        onChange={(e) => handleEditChange('mercadopagoHabilitado', e.target.checked)}
+                                        className="w-4 h-4"
+                                    />
+                                    <Label htmlFor="mercadopagoHabilitado" className="text-gray-300 cursor-pointer">
+                                        Este club cobra la seña con Mercado Pago
+                                    </Label>
+                                </div>
+
+                                {editFormData.mercadopagoHabilitado && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2 col-span-2">
+                                            <Label className="text-gray-300">Access Token de Mercado Pago</Label>
+                                            <Input
+                                                type="password"
+                                                placeholder="APP_USR-..."
+                                                value={editFormData.mercadopagoAccessToken}
+                                                onChange={(e) => handleEditChange('mercadopagoAccessToken', e.target.value)}
+                                                className="bg-white/10 border-white/20 text-white"
+                                            />
+                                            <p className="text-xs text-gray-400">
+                                                Lo obtiene el club en su cuenta de Mercado Pago → Credenciales de producción.
+                                            </p>
+                                        </div>
+                                        <div className="space-y-2 col-span-2">
+                                            <Label className="text-gray-300">Precio de la seña (ARS)</Label>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                step="100"
+                                                placeholder="5000"
+                                                value={editFormData.precioReserva}
+                                                onChange={(e) => handleEditChange('precioReserva', e.target.value)}
+                                                className="bg-white/10 border-white/20 text-white"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             <DialogFooter>
                                 <Button
                                     type="button"
@@ -802,7 +854,7 @@ const SuperAdminClubes = () => {
                         )}
                     </DialogContent>
                 </Dialog>
-                
+
                 {/* ✅ NUEVO: Confirmación activar/desactivar */}
                 <AlertDialog open={toggleDialog.open} onOpenChange={(open) => setToggleDialog({ open, club: toggleDialog.club })}>
                     <AlertDialogContent>

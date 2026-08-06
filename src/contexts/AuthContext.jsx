@@ -46,9 +46,9 @@ export const AuthProvider = ({ children }) => {
         };
 
         // Solo si todavía no tenemos club cargado (evita pisar el que vino del login)
-        if (!club) {
-            loadClubInfo();
-        }
+        // if (!club) {
+        loadClubInfo();
+        // }
     }, []);
 
     // Headers base (incluye club slug en desarrollo)
