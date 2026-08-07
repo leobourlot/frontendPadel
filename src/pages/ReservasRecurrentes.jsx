@@ -132,14 +132,14 @@ const ReservasRecurrentes = () => {
         const diaReal = getDay(fechaInicio); // 0-6 (Domingo-Sábado)
         const diaEsperado = parseInt(formData.diaSemana);
 
-        console.log('📅 Fecha original:', formData.fechaInicio);
-        console.log('📅 Fecha parseada:', fechaInicio);
-        console.log('📅 Día real (getDay):', diaReal);
-        console.log('📅 Día esperado:', diaEsperado);
+        // console.log('📅 Fecha original:', formData.fechaInicio);
+        // console.log('📅 Fecha parseada:', fechaInicio);
+        // console.log('📅 Día real (getDay):', diaReal);
+        // console.log('📅 Día esperado:', diaEsperado);
 
         // Validar que coincidan
         if (diaReal !== diaEsperado) {
-            console.log('❌ No coinciden los días');
+            // console.log('❌ No coinciden los días');
             toast({
                 title: "Error",
                 description: `La fecha seleccionada es ${DIAS_SEMANA[diaReal].nombre}, pero seleccionaste ${DIAS_SEMANA[diaEsperado].nombre}`,
@@ -148,7 +148,7 @@ const ReservasRecurrentes = () => {
             return;
         }
 
-        console.log('✅ Validación correcta - días coinciden');
+        // console.log('✅ Validación correcta - días coinciden');
 
         try {
             const horaFin = calcularHoraFin(formData.horaInicio);
@@ -162,7 +162,7 @@ const ReservasRecurrentes = () => {
                 fechaFin: formData.tieneFinalizacion ? formData.fechaFin : null,
             };
 
-            console.log('📤 Enviando datos:', reservaData);
+            // console.log('📤 Enviando datos:', reservaData);
 
             await reservasService.createRecurrente(reservaData);
 
@@ -174,7 +174,7 @@ const ReservasRecurrentes = () => {
             setDialogOpen(false);
             await loadReservasRecurrentes();
         } catch (error) {
-            console.error('❌ Error creando reserva recurrente:', error);
+            // console.error('❌ Error creando reserva recurrente:', error);
             toast({
                 title: "Error",
                 description: error.message || "No se pudo crear la reserva recurrente",

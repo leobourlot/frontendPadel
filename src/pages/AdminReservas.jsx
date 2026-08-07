@@ -62,21 +62,21 @@ const AdminReservas = () => {
             const fechaFormateada = format(selectedDate, 'yyyy-MM-dd');
             const data = await reservasService.getByCancha(selectedCancha, fechaFormateada);
 
-            console.log('📦 Datos RAW del backend:', JSON.stringify(data, null, 2));
-            console.log('📊 Cantidad de reservas:', data.length);
+            // console.log('📦 Datos RAW del backend:', JSON.stringify(data, null, 2));
+            // console.log('📊 Cantidad de reservas:', data.length);
 
             // Mostrar estructura de la primera reserva si existe
-            if (data.length > 0) {
-                console.log('🔍 Primera reserva completa:', data[0]);
-                console.log('👤 Usuario de primera reserva:', data[0].usuario);
-                console.log('🆔 ID Usuario:', data[0].idUsuario);
-            }
+            // if (data.length > 0) {
+                // console.log('🔍 Primera reserva completa:', data[0]);
+                // console.log('👤 Usuario de primera reserva:', data[0].usuario);
+                // console.log('🆔 ID Usuario:', data[0].idUsuario);
+            // }
 
             // Filtrar solo las confirmadas (sin filtrar por usuario todavía)
             const reservasConfirmadas = data.filter(r => r.estado === 'confirmada');
 
-            console.log('✅ Reservas confirmadas (sin filtrar usuario):', reservasConfirmadas.length);
-            console.log('📋 Detalle:', reservasConfirmadas);
+            // console.log('✅ Reservas confirmadas (sin filtrar usuario):', reservasConfirmadas.length);
+            // console.log('📋 Detalle:', reservasConfirmadas);
 
             setReservas(reservasConfirmadas);
         } catch (error) {
@@ -174,8 +174,8 @@ const AdminReservas = () => {
                                                 setSelectedDate(day);
                                             }}
                                             className={`p-4 rounded-lg border transition-all ${format(selectedDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-                                                    ? 'bg-emerald-500 border-emerald-400 text-white'
-                                                    : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                                                ? 'bg-emerald-500 border-emerald-400 text-white'
+                                                : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
                                                 }`}
                                         >
                                             <p className="text-xs font-medium">
