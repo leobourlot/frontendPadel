@@ -7,6 +7,11 @@ const API_URL = 'https://n8n-bourder-padelturnos.nvtq0w.easypanel.host';
 // Helper para obtener el token
 const getToken = () => localStorage.getItem('token');
 
+const buildQuery = (params) => {
+    const usable = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '');
+    return new URLSearchParams(usable).toString();
+};
+
 // Helper para hacer peticiones autenticadas
 const fetchWithAuth = async (endpoint, options = {}) => {
     const token = getToken();
@@ -198,4 +203,22 @@ export const pagosService = {
     }),
 };
 
-export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService, horariosClub: horariosClubService, pagos: pagosService };
+
+// ====================================
+// SERVICIOS DE REPORTES (solo admin)
+// ====================================
+
+export const reportesService = {
+    getResumen: (desde, hasta) =>
+        fetchWithAuth(`/reportes/resumen?${buildQuery({ desde, hasta })}`),
+    getOcupacion: (desde, hasta) =>
+        fetchWithAuth(`/reportes/ocupacion?${buildQuery({ desde, hasta })}`),
+    getIngresos: (desde, hasta) =>
+        fetchWithAuth(`/reportes/ingresos?${buildQuery({ desde, hasta })}`),
+    getHorariosPico: (desde, hasta) =>
+        fetchWithAuth(`/reportes/horarios-pico?${buildQuery({ desde, hasta })}`),
+    getCancelaciones: (desde, hasta) =>
+        fetchWithAuth(`/reportes/cancelaciones?${buildQuery({ desde, hasta })}`),
+};
+
+export default { canchas: canchasService, horarios: horariosService, reservas: reservasService, usuarios: usuariosService, auth: authService, clubes: clubesService, horariosClub: horariosClubService, pagos: pagosService, reportes: reportesService };

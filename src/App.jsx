@@ -10,6 +10,7 @@ import AdminCanchas from './pages/AdminCanchas';
 import AdminUsuarios from './pages/AdminUsuarios';
 import ReservasRecurrentes from './pages/ReservasRecurrentes';
 import AdminReservas from './pages/AdminReservas';
+import AdminReportes from './pages/AdminReportes'; // ✅ NUEVO
 import Vencido from './pages/Vencido';
 import SuperAdminClubes from './pages/SuperAdminClubes';
 
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/admin/canchas" element={<PrivateRoute><AdminCanchas /></PrivateRoute>} />
                 <Route path="/admin/usuarios" element={<PrivateRoute><AdminUsuarios /></PrivateRoute>} />
                 <Route path="/admin/reservas" element={<PrivateRoute><AdminReservas /></PrivateRoute>} />
+                <Route path="/admin/reportes" element={<PrivateRoute><AdminReportes /></PrivateRoute>} /> {/* ✅ NUEVO */}
                 <Route path="/" element={<Navigate to="/reservas" />} />
                 <Route path="/superadmin/clubes" element={<SuperAdminRoute><SuperAdminClubes /></SuperAdminRoute>} />            </Routes>
         </AuthProvider>

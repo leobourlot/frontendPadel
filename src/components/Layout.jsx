@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck, LogIn, Building2 } from 'lucide-react';
+import { Home, Calendar, Clock, LogOut, Menu, X, MapPin, Users, Repeat, CalendarCheck, LogIn, Building2, BarChart3 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from './Footer';
@@ -20,7 +20,7 @@ const Layout = ({ children }) => {
     const isGuest = !user;
 
     const isSuperAdmin = user?.rol === 'superadmin';
-    
+
     const isAdmin = user?.rol === 'admin';
     // const isAdmin = user?.rol === 'admin';
 
@@ -41,7 +41,8 @@ const Layout = ({ children }) => {
     const adminMenuItems = [
         { icon: MapPin, label: 'Gestionar Canchas', path: '/admin/canchas' },
         { icon: Users, label: 'Gestionar Usuarios', path: '/admin/usuarios' },
-        { icon: CalendarCheck, label: 'Gestionar Reservas', path: '/admin/reservas' }
+        { icon: CalendarCheck, label: 'Gestionar Reservas', path: '/admin/reservas' },
+        { icon: BarChart3, label: 'Reportes', path: '/admin/reportes' }
     ];
 
     const superAdminMenuItems = [
