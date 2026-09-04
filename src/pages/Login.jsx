@@ -16,28 +16,57 @@ const Login = () => {
     const [dni, setDni] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, loginSuperAdmin, club } = useAuth();
+    const { login, club } = useAuth();
     const navigate = useNavigate();
     const { toast } = useToast();
     const location = useLocation();
 
-    const [modoSuperAdmin, setModoSuperAdmin] = useState(false);
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+
+    //     try {
+    //         if (modoSuperAdmin) {
+    //             await loginSuperAdmin(dni, password); // ✅ NUEVO
+    //             toast({
+    //                 title: "¡Bienvenido, Super Admin! 👑",
+    //                 description: "Has iniciado sesión correctamente",
+    //             });
+    //             navigate('/superadmin/clubes');
+    //             return;
+    //         }
+
+    //         await login(dni, password);
+    //         toast({
+    //             title: "¡Bienvenido! 🎾",
+    //             description: "Has iniciado sesión correctamente",
+    //         });
+    //         const from = location.state?.from || '/dashboard';
+    //         navigate(from);
+    //     } catch (error) {
+    //         console.error('Error en login:', error);
+    //         const errorMessage = error.message.includes('desactivado')
+    //             ? "Tu cuenta ha sido desactivada. Contacta al administrador."
+    //             : modoSuperAdmin
+    //                 ? "DNI o contraseña incorrectos"
+    //                 : "DNI o contraseña incorrectos";
+
+    //         toast({
+    //             title: "Error al iniciar sesión",
+    //             description: errorMessage,
+    //             variant: "destructive",
+    //         });
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            if (modoSuperAdmin) {
-                await loginSuperAdmin(dni, password); // ✅ NUEVO
-                toast({
-                    title: "¡Bienvenido, Super Admin! 👑",
-                    description: "Has iniciado sesión correctamente",
-                });
-                navigate('/superadmin/clubes');
-                return;
-            }
-
             await login(dni, password);
             toast({
                 title: "¡Bienvenido! 🎾",
@@ -49,9 +78,7 @@ const Login = () => {
             console.error('Error en login:', error);
             const errorMessage = error.message.includes('desactivado')
                 ? "Tu cuenta ha sido desactivada. Contacta al administrador."
-                : modoSuperAdmin
-                    ? "DNI o contraseña incorrectos"
-                    : "DNI o contraseña incorrectos";
+                : "DNI o contraseña incorrectos";
 
             toast({
                 title: "Error al iniciar sesión",
@@ -84,15 +111,15 @@ const Login = () => {
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
                                     transition={{ delay: 0.2, type: "spring" }}
-                                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${modoSuperAdmin ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-emerald-500`}
                                 >
-                                    {modoSuperAdmin ? <ShieldCheck className="w-8 h-8 text-white" /> : <User className="w-8 h-8 text-white" />}
+                                    <User className="w-8 h-8 text-white" />
                                 </motion.div>
                                 <h1 className="text-3xl font-bold text-white mb-2">
-                                    {modoSuperAdmin ? 'Acceso Super Admin' : 'Bienvenido'}
+                                    Bienvenido
                                 </h1>
                                 <p className="text-gray-300">
-                                    {modoSuperAdmin ? 'Panel de administración general' : 'Inicia sesión para reservar tu cancha'}
+                                    Inicia sesión para reservar tu cancha
                                 </p>
                             </div>
 
@@ -126,7 +153,7 @@ const Login = () => {
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className={`w-full text-white ${modoSuperAdmin ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-500 hover:bg-emerald-600'}`}
+                                    className={`w-full text-white bg-emerald-500 hover:bg-emerald-600`}
                                 >
                                     {loading ? (
                                         <div className="flex items-center gap-2">
@@ -143,21 +170,12 @@ const Login = () => {
                             </form>
 
                             <div className="mt-6 text-center space-y-2">
-                                {!modoSuperAdmin && (
-                                    <p className="text-gray-300">
-                                        ¿No tienes cuenta?{' '}
-                                        <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold">
-                                            Regístrate aquí
-                                        </Link>
-                                    </p>
-                                )}
-                                <button
-                                    type="button"
-                                    onClick={() => setModoSuperAdmin(!modoSuperAdmin)}
-                                    className="text-xs text-gray-400 hover:text-white"
-                                >
-                                    {modoSuperAdmin ? '← Volver a login normal' : 'Acceso Super Admin'}
-                                </button>
+                                <p className="text-gray-300">
+                                    ¿No tienes cuenta?{' '}
+                                    <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold">
+                                        Regístrate aquí
+                                    </Link>
+                                </p>
                             </div>
                         </div>
                     </motion.div>

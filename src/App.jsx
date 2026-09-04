@@ -13,7 +13,7 @@ import AdminReservas from './pages/AdminReservas';
 import AdminReportes from './pages/AdminReportes'; // ✅ NUEVO
 import Vencido from './pages/Vencido';
 import SuperAdminClubes from './pages/SuperAdminClubes';
-
+import SuperAdminLogin from './pages/SuperAdminLogin';
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -51,6 +51,7 @@ function App() {
                 <Route path="/admin/reservas" element={<PrivateRoute><AdminReservas /></PrivateRoute>} />
                 <Route path="/admin/reportes" element={<PrivateRoute><AdminReportes /></PrivateRoute>} /> {/* ✅ NUEVO */}
                 <Route path="/" element={<Navigate to="/reservas" />} />
+                <Route path="/superadmin-panel-leo/login" element={<SuperAdminLogin />} />
                 <Route path="/superadmin/clubes" element={<SuperAdminRoute><SuperAdminClubes /></SuperAdminRoute>} />            </Routes>
         </AuthProvider>
     );

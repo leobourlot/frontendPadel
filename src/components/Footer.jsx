@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter } from 'lucide-react';
-import bourder from '/logoBourder.svg'
+import bourder from '/logoBourderVerde.svg'
 import { useAuth } from '../contexts/AuthContext'; // ✅ NUEVO
 
 const Footer = () => {
