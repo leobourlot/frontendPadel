@@ -10,11 +10,12 @@ import AdminCanchas from './pages/AdminCanchas';
 import AdminUsuarios from './pages/AdminUsuarios';
 import ReservasRecurrentes from './pages/ReservasRecurrentes';
 import AdminReservas from './pages/AdminReservas';
-import AdminReportes from './pages/AdminReportes'; 
+import AdminReportes from './pages/AdminReportes';
 import Vencido from './pages/Vencido';
 import SuperAdminClubes from './pages/SuperAdminClubes';
 import SuperAdminLogin from './pages/SuperAdminLogin';
-import SuperAdminUsuarios from './pages/SuperAdminUsuarios'; 
+import SuperAdminUsuarios from './pages/SuperAdminUsuarios';
+import AdminMercadoPago from './pages/AdminMercadoPago';
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/admin/usuarios" element={<PrivateRoute><AdminUsuarios /></PrivateRoute>} />
                 <Route path="/admin/reservas" element={<PrivateRoute><AdminReservas /></PrivateRoute>} />
                 <Route path="/admin/reportes" element={<PrivateRoute><AdminReportes /></PrivateRoute>} /> {/* ✅ NUEVO */}
+                <Route path="/admin/mercadopago" element={<PrivateRoute><AdminMercadoPago /></PrivateRoute>} /> {/* ✅ NUEVO */}
                 <Route path="/" element={<Navigate to="/reservas" />} />
                 <Route path="/superadmin-panel-leo/login" element={<SuperAdminLogin />} />
                 <Route path="/superadmin/usuarios" element={<SuperAdminRoute><SuperAdminUsuarios /></SuperAdminRoute>} /> {/* ✅ NUEVO */}

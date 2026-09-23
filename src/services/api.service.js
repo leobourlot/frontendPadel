@@ -223,6 +223,9 @@ export const pagosService = {
         method: 'POST',
         body: JSON.stringify(reservaData),
     }),
+    conectarMercadoPago: () => fetchWithAuth('/pagos/mp/conectar'),
+    estadoMercadoPago: () => fetchWithAuth('/pagos/mp/estado'),
+    desconectarMercadoPago: () => fetchWithAuth('/pagos/mp/desconectar', { method: 'DELETE' }),
 };
 
 

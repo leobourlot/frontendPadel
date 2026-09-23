@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
     // ✅ DEBUG: Ver qué usuario tenemos
     // console.log('👤 Usuario en Layout:', user);
     // console.log('👤 Rol del usuario:', user?.rol);
-s
+    s
     const isGuest = !user;
 
     const isSuperAdmin = user?.rol === 'superadmin';
@@ -42,13 +42,14 @@ s
         { icon: MapPin, label: 'Gestionar Canchas', path: '/admin/canchas' },
         { icon: Users, label: 'Gestionar Usuarios', path: '/admin/usuarios' },
         { icon: CalendarCheck, label: 'Gestionar Reservas', path: '/admin/reservas' },
-        { icon: BarChart3, label: 'Reportes', path: '/admin/reportes' }
+        { icon: BarChart3, label: 'Reportes', path: '/admin/reportes' },
+        { icon: CreditCard, label: 'Mercado Pago', path: '/admin/mercadopago' }, 
     ];
 
     const superAdminMenuItems = [
-    { icon: Building2, label: 'Clubes (Super Admin)', path: '/superadmin/clubes' },
-    { icon: Users, label: 'Usuarios (Super Admin)', path: '/superadmin/usuarios' }, // ✅ NUEVO
-];
+        { icon: Building2, label: 'Clubes (Super Admin)', path: '/superadmin/clubes' },
+        { icon: Users, label: 'Usuarios (Super Admin)', path: '/superadmin/usuarios' }, 
+    ];
 
     const menuItems = isGuest
         ? guestMenuItems
