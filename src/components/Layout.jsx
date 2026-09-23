@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
     // ✅ DEBUG: Ver qué usuario tenemos
     // console.log('👤 Usuario en Layout:', user);
     // console.log('👤 Rol del usuario:', user?.rol);
-
+s
     const isGuest = !user;
 
     const isSuperAdmin = user?.rol === 'superadmin';
@@ -46,8 +46,9 @@ const Layout = ({ children }) => {
     ];
 
     const superAdminMenuItems = [
-        { icon: Building2, label: 'Clubes (Super Admin)', path: '/superadmin/clubes' },
-    ];
+    { icon: Building2, label: 'Clubes (Super Admin)', path: '/superadmin/clubes' },
+    { icon: Users, label: 'Usuarios (Super Admin)', path: '/superadmin/usuarios' }, // ✅ NUEVO
+];
 
     const menuItems = isGuest
         ? guestMenuItems

@@ -109,6 +109,18 @@ export const reservasService = {
 // ====================================
 // SERVICIOS DE USUARIOS
 // ====================================
+// export const usuariosService = {
+//     getAll: () => fetchWithAuth('/usuarios'),
+//     getById: (id) => fetchWithAuth(`/usuarios/${id}`),
+//     update: (id, usuarioData) => fetchWithAuth(`/usuarios/${id}`, { method: 'PATCH', body: JSON.stringify(usuarioData) }),
+//     updateRole: (id, rol) => fetchWithAuth(`/usuarios/${id}/rol`, { method: 'PATCH', body: JSON.stringify({ rol }) }),
+//     toggleActive: (id, activo) => fetchWithAuth(`/usuarios/${id}/estado`, { method: 'PATCH', body: JSON.stringify({ activo }) }),
+//     delete: (id) => fetchWithAuth(`/usuarios/${id}`, { method: 'DELETE' }),
+// };
+
+// ====================================
+// SERVICIOS DE USUARIOS
+// ====================================
 export const usuariosService = {
     getAll: () => fetchWithAuth('/usuarios'),
     getById: (id) => fetchWithAuth(`/usuarios/${id}`),
@@ -116,6 +128,16 @@ export const usuariosService = {
     updateRole: (id, rol) => fetchWithAuth(`/usuarios/${id}/rol`, { method: 'PATCH', body: JSON.stringify({ rol }) }),
     toggleActive: (id, activo) => fetchWithAuth(`/usuarios/${id}/estado`, { method: 'PATCH', body: JSON.stringify({ activo }) }),
     delete: (id) => fetchWithAuth(`/usuarios/${id}`, { method: 'DELETE' }),
+};
+
+// ====================================
+// SERVICIOS DE USUARIOS (solo SUPERADMIN — todos los clubes)
+// ====================================
+export const usuariosSuperAdminService = {
+    getAll: (idClub) => fetchWithAuth(`/usuarios/superadmin/todos${idClub ? `?idClub=${idClub}` : ''}`),
+    create: (usuarioData) => fetchWithAuth('/usuarios/superadmin', { method: 'POST', body: JSON.stringify(usuarioData) }),
+    update: (id, usuarioData) => fetchWithAuth(`/usuarios/superadmin/${id}`, { method: 'PATCH', body: JSON.stringify(usuarioData) }),
+    delete: (id) => fetchWithAuth(`/usuarios/superadmin/${id}`, { method: 'DELETE' }),
 };
 
 // ====================================

@@ -2,6 +2,12 @@
 RewriteEngine On
 RewriteBase /
 
+# robots.txt y sitemap.xml dinámicos por subdominio (PHP)
+RewriteRule ^robots\.txt$ robots.php [L]
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+# No exponer el helper directamente
+RewriteRule ^_host\.php$ - [F]
+
 # No aplicar la regla a index.html directamente
 RewriteRule ^index\.html$ - [L]
 
